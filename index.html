@@ -450,6 +450,8 @@
           <div id="searchResultArea" class="space-y-4">
              <div class="text-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300"><span class="text-4xl block mb-2">📭</span> ระบุเงื่อนไขและกดค้นหา</div>
           </div>
+
+          <div id="oldDbResultArea" class="space-y-4"></div>
         </div>
 
         <!-- ================= 4. หน้าออกรายงาน Excel ================= -->
@@ -720,8 +722,13 @@
     }
 
     // เรียกดึงข้อมูล (แทนที่ google.script.run.withSuccessHandler(...).FUNC())
-    function gasApiGet(action) {
-      return gasJsonpRequest({ action: action }, true);
+    // extraParams (ไม่บังคับ): พารามิเตอร์เพิ่มเติม เช่น { keyword: '...' } สำหรับ action ที่ต้องมีเงื่อนไขค้นหา
+    function gasApiGet(action, extraParams) {
+      var params = { action: action };
+      if (extraParams) {
+        Object.keys(extraParams).forEach(function(k) { params[k] = extraParams[k]; });
+      }
+      return gasJsonpRequest(params, true);
     }
 
     // เรียกบันทึก/แก้ไขข้อมูล (แทนที่ google.script.run.withSuccessHandler(...)[actionName](data))
@@ -1559,7 +1566,8 @@
 
       var area = document.getElementById('searchResultArea');
       area.innerHTML = '<div class="text-center py-10"><span class="animate-pulse text-gray-500">กำลังค้นหาข้อมูล...</span></div>';
-      
+      searchOldDatabaseUI(keyword);
+
       gasApiGet('searchPatientHistory').then(function(data) { 
         allPatientData = data.reverse(); 
         var area = document.getElementById('searchResultArea'); area.innerHTML = '';
@@ -1637,6 +1645,56 @@
         }
       }).catch(function(err) { 
         document.getElementById('searchResultArea').innerHTML = '<div class="text-center py-10 text-red-500">เกิดข้อผิดพลาด: ' + err.toString() + '</div>';
+      });
+    }
+
+    // ค้นหาประวัติจากฐานข้อมูลเดิม (ปีงบประมาณก่อน) — แสดงต่อท้ายผลลัพธ์จากระบบปัจจุบัน
+    function searchOldDatabaseUI(keyword) {
+      var oldArea = document.getElementById('oldDbResultArea');
+      if (!keyword) { oldArea.innerHTML = ''; return; }
+      oldArea.innerHTML = '<div class="text-center py-6"><span class="animate-pulse text-gray-400 text-sm">กำลังค้นหาในฐานข้อมูลเดิม...</span></div>';
+
+      gasApiGet('searchOldDatabase', { keyword: keyword }).then(function(res) {
+        var records = (res && res.records) || [];
+        if (records.length === 0) { oldArea.innerHTML = ''; return; }
+
+        var html = '<div class="flex items-center gap-3 mb-3 mt-2">' +
+                      '<span class="h-px flex-1 bg-gray-200"></span>' +
+                      '<span class="text-xs font-bold text-gray-400 uppercase tracking-wide whitespace-nowrap">🗄️ พบประวัติในฐานข้อมูลเดิม (ปีงบประมาณก่อน) ' + records.length + ' รายการ</span>' +
+                      '<span class="h-px flex-1 bg-gray-200"></span>' +
+                   '</div>';
+
+        records.forEach(function(item) {
+          var probHtml = '';
+          if (item.socialProblem.length > 0) {
+            item.socialProblem.forEach(function(p) {
+              probHtml += '<span class="inline-block bg-amber-50 text-amber-700 px-2 py-1 rounded text-[11px] font-bold mr-1 mb-1 border border-amber-100">' + p + '</span>';
+            });
+          } else { probHtml = '<span class="text-gray-400 text-xs">-</span>'; }
+
+          html += '<div class="bg-amber-50/40 rounded-xl border border-amber-200 shadow-sm overflow-hidden mb-4">' +
+                    '<div class="bg-amber-100/60 px-4 py-2.5 border-b border-amber-200 flex justify-between items-center">' +
+                      '<div class="text-xs font-bold text-amber-700">🗄️ ข้อมูลจากฐานข้อมูลเดิม' + (item.name ? (' — ' + item.name) : '') + '</div>' +
+                      '<div class="text-xs text-gray-500">วันที่: ' + (item.date || '-') + '</div>' +
+                    '</div>' +
+                    '<div class="p-4 text-sm">' +
+                      '<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">' +
+                        '<div><span class="text-gray-500">HN:</span> <span class="font-bold">' + (item.hn || '-') + '</span></div>' +
+                        '<div><span class="text-gray-500">AN:</span> <span class="font-bold">' + (item.an || '-') + '</span></div>' +
+                        '<div><span class="text-gray-500">ประเภทผู้ป่วย:</span> <span class="font-bold">' + (item.patientType || '-') + '</span></div>' +
+                        '<div><span class="text-gray-500">กลุ่มเป้าหมาย:</span> <span class="font-bold">' + (item.target || '-') + '</span></div>' +
+                        (item.moo || item.subDist || item.dist || item.prov ?
+                          '<div class="md:col-span-2"><span class="text-gray-500">ที่อยู่:</span> <span class="font-bold">ม.' + (item.moo || '-') + ' ต.' + (item.subDist || '-') + ' อ.' + (item.dist || '-') + ' จ.' + (item.prov || '-') + '</span></div>' : '') +
+                      '</div>' +
+                      '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">📌 ปัญหาทางสังคม</p><div>' + probHtml + '</div></div>' +
+                      (item.service ? '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">🛠️ การให้บริการ</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100">' + item.service + '</div></div>' : '') +
+                      (item.detail ? '<div><p class="text-xs font-bold text-gray-500 mb-1">📝 รายละเอียด</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100 whitespace-pre-line">' + item.detail + '</div></div>' : '') +
+                    '</div>' +
+                  '</div>';
+        });
+        oldArea.innerHTML = html;
+      }).catch(function(err) {
+        oldArea.innerHTML = '<div class="text-center py-4 text-red-400 text-sm">ค้นหาในฐานข้อมูลเดิมไม่สำเร็จ: ' + err.toString() + '</div>';
       });
     }
 
