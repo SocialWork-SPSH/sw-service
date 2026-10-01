@@ -1247,7 +1247,7 @@
                 for(var i=0; i<provincesData.length; i++) {
                     var p = provincesData[i];
                     var opt = document.createElement('option');
-                    opt.value = p.name_th; opt.innerHTML = p.name_th; opt.setAttribute('data-id', p.id);
+                    opt.value = p.name.th; opt.innerHTML = p.name.th; opt.setAttribute('data-id', p.id);
                     provinceSelect.appendChild(opt);
                 }
                 provinceSelect.value = "ราชบุรี"; 
@@ -1270,13 +1270,13 @@
         districtSelect.innerHTML = '<option value="">-- อำเภอ --</option>'; subDistrictSelect.innerHTML = '<option value="">-- ตำบล --</option>';
         
         var selectedProv = provinceSelect.value; var provObj = null;
-        for(var i=0; i<provincesData.length; i++) { if(provincesData[i].name_th === selectedProv) { provObj = provincesData[i]; break; } }
+        for(var i=0; i<provincesData.length; i++) { if(provincesData[i].name.th === selectedProv) { provObj = provincesData[i]; break; } }
         if (!provObj) return;
         
         for(var j=0; j<districtsData.length; j++) {
             var d = districtsData[j];
             if(d.province_id === provObj.id) {
-                var opt = document.createElement('option'); opt.value = d.name_th; opt.innerHTML = d.name_th; opt.setAttribute('data-id', d.id); districtSelect.appendChild(opt);
+                var opt = document.createElement('option'); opt.value = d.name.th; opt.innerHTML = d.name.th; opt.setAttribute('data-id', d.id); districtSelect.appendChild(opt);
             }
         }
         populateSubDistrict();
@@ -1287,12 +1287,12 @@
         if(!subDistrictSelect || !districtSelect) return;
         subDistrictSelect.innerHTML = '<option value="">-- ตำบล --</option>';
         var selectedDist = districtSelect.value; var distObj = null;
-        for(var i=0; i<districtsData.length; i++) { if(districtsData[i].name_th === selectedDist) { distObj = districtsData[i]; break; } }
+        for(var i=0; i<districtsData.length; i++) { if(districtsData[i].name.th === selectedDist) { distObj = districtsData[i]; break; } }
         if (!distObj) return;
         for(var j=0; j<subDistrictsData.length; j++) {
             var s = subDistrictsData[j];
             if(s.district_id === distObj.id) {
-                var opt = document.createElement('option'); opt.value = s.name_th; opt.innerHTML = s.name_th; subDistrictSelect.appendChild(opt);
+                var opt = document.createElement('option'); opt.value = s.name.th; opt.innerHTML = s.name.th; subDistrictSelect.appendChild(opt);
             }
         }
     }
@@ -1495,7 +1495,7 @@
       for(var j=0; j<provincesData.length; j++) {
           var p = provincesData[j];
           var opt = document.createElement('option');
-          opt.value = p.name_th; opt.innerHTML = p.name_th; opt.setAttribute('data-id', p.id);
+          opt.value = p.name.th; opt.innerHTML = p.name.th; opt.setAttribute('data-id', p.id);
           pSel.appendChild(opt);
       }
       pSel.value = item.prov || '';
@@ -1504,21 +1504,21 @@
       var sSel = document.getElementById('fu_subDistrict'); sSel.innerHTML = '<option value="">-- ตำบล --</option>';
       
       var provObj = null;
-      for(var k=0; k<provincesData.length; k++) { if(provincesData[k].name_th === pSel.value) { provObj = provincesData[k]; break; } }
+      for(var k=0; k<provincesData.length; k++) { if(provincesData[k].name.th === pSel.value) { provObj = provincesData[k]; break; } }
       if(provObj) {
           for(var l=0; l<districtsData.length; l++) {
               if(districtsData[l].province_id === provObj.id) {
-                  var opt2 = document.createElement('option'); opt2.value = districtsData[l].name_th; opt2.innerHTML = districtsData[l].name_th; opt2.setAttribute('data-id', districtsData[l].id); dSel.appendChild(opt2);
+                  var opt2 = document.createElement('option'); opt2.value = districtsData[l].name.th; opt2.innerHTML = districtsData[l].name.th; opt2.setAttribute('data-id', districtsData[l].id); dSel.appendChild(opt2);
               }
           }
           dSel.value = item.dist || '';
           
           var distObj = null;
-          for(var m=0; m<districtsData.length; m++) { if(districtsData[m].name_th === dSel.value) { distObj = districtsData[m]; break; } }
+          for(var m=0; m<districtsData.length; m++) { if(districtsData[m].name.th === dSel.value) { distObj = districtsData[m]; break; } }
           if(distObj) {
               for(var n=0; n<subDistrictsData.length; n++) {
                   if(subDistrictsData[n].district_id === distObj.id) {
-                      var opt3 = document.createElement('option'); opt3.value = subDistrictsData[n].name_th; opt3.innerHTML = subDistrictsData[n].name_th; sSel.appendChild(opt3);
+                      var opt3 = document.createElement('option'); opt3.value = subDistrictsData[n].name.th; opt3.innerHTML = subDistrictsData[n].name.th; sSel.appendChild(opt3);
                   }
               }
               sSel.value = item.subDist || '';
@@ -1528,22 +1528,22 @@
       pSel.onchange = function() {
          dSel.innerHTML = '<option value="">-- อำเภอ --</option>'; sSel.innerHTML = '<option value="">-- ตำบล --</option>';
          var pr = null;
-         for(var x=0; x<provincesData.length; x++) { if(provincesData[x].name_th === this.value) { pr = provincesData[x]; break; } }
+         for(var x=0; x<provincesData.length; x++) { if(provincesData[x].name.th === this.value) { pr = provincesData[x]; break; } }
          if(!pr) return;
          for(var y=0; y<districtsData.length; y++) {
              if(districtsData[y].province_id === pr.id) {
-                 var o = document.createElement('option'); o.value = districtsData[y].name_th; o.innerHTML = districtsData[y].name_th; o.setAttribute('data-id', districtsData[y].id); dSel.appendChild(o);
+                 var o = document.createElement('option'); o.value = districtsData[y].name.th; o.innerHTML = districtsData[y].name.th; o.setAttribute('data-id', districtsData[y].id); dSel.appendChild(o);
              }
          }
       };
       dSel.onchange = function() {
          sSel.innerHTML = '<option value="">-- ตำบล --</option>';
          var di = null;
-         for(var x=0; x<districtsData.length; x++) { if(districtsData[x].name_th === this.value) { di = districtsData[x]; break; } }
+         for(var x=0; x<districtsData.length; x++) { if(districtsData[x].name.th === this.value) { di = districtsData[x]; break; } }
          if(!di) return;
          for(var y=0; y<subDistrictsData.length; y++) {
              if(subDistrictsData[y].district_id === di.id) {
-                 var o = document.createElement('option'); o.value = subDistrictsData[y].name_th; o.innerHTML = subDistrictsData[y].name_th; sSel.appendChild(o);
+                 var o = document.createElement('option'); o.value = subDistrictsData[y].name.th; o.innerHTML = subDistrictsData[y].name.th; sSel.appendChild(o);
              }
          }
       };
