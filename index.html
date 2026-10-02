@@ -10,7 +10,10 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/th.js"></script>
+
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
     :root { --primary: #3d82af; --primary-dark: #2c6385; --accent: #ff3f3e; }
@@ -25,12 +28,11 @@
     .page-section { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
     .page-section.active { display: block; opacity: 1; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    /* แสดงวันที่เป็น พ.ศ.: ซ่อนตัวเลขที่เบราว์เซอร์วาดเอง (ยังเป็น ค.ศ. เสมอ) แล้ววาดข้อความ พ.ศ. ทับแทน
-       โดยยังคลิกเปิดปฏิทินเดิมของเบราว์เซอร์ได้ตามปกติ (overlay ไม่บังการคลิก) */
-    input.buddhist-date { color: transparent; position: relative; z-index: 1; background: transparent; }
-    .buddhist-date-overlay { position: absolute; left: 0; right: 0; top: 1.5rem; bottom: 0; display: flex; align-items: center; padding: 0.625rem 0.75rem; pointer-events: none; color: #1e293b; font-size: 1rem; white-space: nowrap; overflow: hidden; background: #ffffff; border-radius: 0.5rem; }
-    .buddhist-date-overlay:empty::before { content: 'วว/ดด/ปปปป'; color: #94a3b8; }
-    .buddhist-date-overlay-sm { top: 1.25rem; padding: 0.5rem; font-size: 0.75rem; border-radius: 0.25rem; }
+    /* ปฏิทินเลือกวันที่แบบ พ.ศ. (Flatpickr) แทนปฏิทินเดิมของเบราว์เซอร์ที่บังคับเป็น ค.ศ. เสมอ
+       ช่อง input เดิม (type=date) จะถูกซ่อนไว้เป็นตัวเก็บค่าจริงแบบ ISO (ค.ศ.) สำหรับส่งฟอร์ม
+       ส่วนช่องที่ผู้ใช้เห็นและคลิกเลือกวันที่ คือ altInput ที่ Flatpickr สร้างขึ้นใหม่ */
+    .flatpickr-current-month input.cur-year { font-size: inherit; }
+    .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden bg-slate-50">
@@ -120,7 +122,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="bg-sky-50 px-5 py-3 border-l-4 border-[#3d82af]"><h2 class="font-bold text-[#3d82af]">1. ข้อมูลการให้บริการ</h2></div>
               <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="relative"><label class="block text-sm font-bold text-gray-700 mb-1">วันที่ให้บริการ</label><input type="date" id="serviceDate" name="serviceDate" class="input-field cursor-pointer buddhist-date" required><span id="serviceDate_disp" class="buddhist-date-overlay"></span></div>
+                <div><label class="block text-sm font-bold text-gray-700 mb-1">วันที่ให้บริการ</label><input type="text" id="serviceDate" name="serviceDate" class="input-field cursor-pointer" required></div>
                 <div>
                   <label class="block text-sm font-bold text-gray-700 mb-1">นักสังคมสงเคราะห์</label>
                   <select name="socialWorker" class="input-field sw-dynamic-select" required>
@@ -169,7 +171,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                   <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อ - นามสกุล</label><input type="text" name="fullName" class="input-field" placeholder="ระบุชื่อและนามสกุล" required></div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">เลขบัตรประชาชน / Passport</label><input type="text" name="idCard" class="input-field" placeholder="เลข 13 หลัก"></div>
-                  <div class="relative"><label class="block text-sm font-bold text-gray-700 mb-1">วันเดือนปีเกิด (ดึงอายุอัตโนมัติ)</label><input type="date" id="dobInput" name="dob" class="input-field buddhist-date" onchange="calculateAge(); refreshDateOverlay('dobInput')"><span id="dobInput_disp" class="buddhist-date-overlay"></span></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">วันเดือนปีเกิด (ดึงอายุอัตโนมัติ)</label><input type="text" id="dobInput" name="dob" class="input-field"></div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">อายุ</label><input type="text" id="ageDisplay" class="input-field bg-gray-50" placeholder="คำนวณอัตโนมัติ" readonly><input type="hidden" id="ageInput" name="age"></div>
                   <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">กลุ่มเป้าหมาย</label>
@@ -356,7 +358,7 @@
                             <select id="fu_subDistrict" name="fu_subDistrict" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs"><option value="">-- ตำบล --</option></select>
                          </div>
                        </div>
-                       <div class="relative"><label class="block text-xs font-bold text-gray-700 mb-1">วันเดือนปีเกิด</label><input type="date" id="fu_dob" name="fu_dob" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs buddhist-date buddhist-date-sm"><span id="fu_dob_disp" class="buddhist-date-overlay buddhist-date-overlay-sm"></span></div>
+                       <div><label class="block text-xs font-bold text-gray-700 mb-1">วันเดือนปีเกิด</label><input type="text" id="fu_dob" name="fu_dob" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs"></div>
                        <div>
                          <label class="block text-xs font-bold text-gray-700 mb-1">สิทธิการรักษา</label>
                          <select id="fu_edit_med" name="fu_edit_med" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs">
@@ -370,7 +372,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-4 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                  <div class="relative"><label class="block text-sm font-bold text-gray-700 mb-1">วันที่ติดตาม</label><input type="date" id="serviceDateUpdate" name="serviceDateUpdate" class="input-field text-sm buddhist-date" required><span id="serviceDateUpdate_disp" class="buddhist-date-overlay"></span></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">วันที่ติดตาม</label><input type="text" id="serviceDateUpdate" name="serviceDateUpdate" class="input-field text-sm" required></div>
                   <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">นักสังคมฯ ที่ติดตาม</label>
                     <select name="workerUpdate" class="input-field text-sm sw-dynamic-select" required>
@@ -986,31 +988,54 @@
     });
 
     // ==========================================
-    // แสดงวันที่เป็น พ.ศ. (ช่อง input type=date ของเบราว์เซอร์แสดงปี ค.ศ. เสมอ แก้ไม่ได้โดยตรง
-    // จึงซ่อนตัวเลขเดิมแล้ววาดข้อความ พ.ศ. ทับแทน ส่วนค่าที่เก็บจริงยังเป็น ค.ศ./ISO เหมือนเดิมทุกจุด)
+    // ปฏิทินเลือกวันที่แบบ พ.ศ. (ใช้ Flatpickr แทนปฏิทินเดิมของเบราว์เซอร์ที่บังคับแสดง ค.ศ. เสมอ
+    // แก้ไม่ได้ด้วย CSS/lang เพียงอย่างเดียว) ช่อง input เดิมถูกซ่อนไว้เก็บค่าจริงแบบ ISO (ค.ศ.)
+    // สำหรับส่งฟอร์มเหมือนเดิมทุกจุด ส่วนช่องที่ผู้ใช้เห็น/คลิกเลือกวันที่คือ altInput ที่ Flatpickr สร้างให้
     // ==========================================
-    var BUDDHIST_DATE_IDS = ['serviceDate', 'dobInput', 'fu_dob', 'serviceDateUpdate'];
-    function formatBuddhistDate(isoValue) {
-        if (!isoValue) return '';
-        var p = isoValue.split('-');
-        if (p.length !== 3) return '';
-        var beYear = parseInt(p[0], 10) + 543;
-        return p[2] + '/' + p[1] + '/' + beYear;
+    function toBuddhistDateStr(date) {
+        if (!date) return '';
+        var d = ('0' + date.getDate()).slice(-2);
+        var m = ('0' + (date.getMonth() + 1)).slice(-2);
+        var y = date.getFullYear() + 543;
+        return d + '/' + m + '/' + y;
     }
-    function refreshDateOverlay(inputId) {
-        var inp = document.getElementById(inputId);
-        var ov = document.getElementById(inputId + '_disp');
-        if (!inp || !ov) return;
-        ov.textContent = formatBuddhistDate(inp.value);
+    // แก้ตัวเลขปีที่หัวปฏิทิน (Chrome/Flatpickr คำนวณเป็น ค.ศ. เสมอ) ให้เป็น พ.ศ. ทุกครั้งที่เปิด/เปลี่ยนเดือน/ปี
+    function patchFlatpickrYear(instance) {
+        if (instance && instance.currentYearElement) {
+            instance.currentYearElement.value = instance.currentYear + 543;
+        }
     }
-    function initBuddhistDateOverlays() {
-        BUDDHIST_DATE_IDS.forEach(function(id) {
-            var inp = document.getElementById(id);
-            if (!inp) return;
-            refreshDateOverlay(id);
-            inp.addEventListener('input', function() { refreshDateOverlay(id); });
-            inp.addEventListener('change', function() { refreshDateOverlay(id); });
-        });
+    function createBuddhistDatePicker(id, extraOptions) {
+        var el = document.getElementById(id);
+        if (!el || typeof flatpickr === 'undefined') return null;
+        var opts = {
+            altInput: true,
+            altInputClass: el.className,
+            dateFormat: 'Y-m-d',
+            allowInput: false,
+            disableMobile: true,
+            locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.th) ? flatpickr.l10ns.th : undefined,
+            formatDate: function(date) { return toBuddhistDateStr(date); },
+            onReady: function(sd, ds, instance) { patchFlatpickrYear(instance); },
+            onMonthChange: function(sd, ds, instance) { patchFlatpickrYear(instance); },
+            onYearChange: function(sd, ds, instance) { patchFlatpickrYear(instance); },
+            onOpen: function(sd, ds, instance) { patchFlatpickrYear(instance); }
+        };
+        if (extraOptions) { for (var k in extraOptions) { opts[k] = extraOptions[k]; } }
+        return flatpickr(el, opts);
+    }
+    function initBuddhistDatePickers() {
+        createBuddhistDatePicker('serviceDate');
+        createBuddhistDatePicker('dobInput', { onChange: function(){ try { calculateAge(); } catch(e){} } });
+        createBuddhistDatePicker('fu_dob');
+        createBuddhistDatePicker('serviceDateUpdate');
+    }
+    // ตั้ง/ล้างค่าวันที่ผ่าน Flatpickr instance แทนการตั้ง .value/.valueAsDate ตรงๆ
+    // (เพราะช่องที่มองเห็นถูกสลับเป็น altInput ของ Flatpickr ไปแล้ว ต้องสั่งผ่าน instance เท่านั้น)
+    function setFpDate(id, dateValue) {
+        var el = document.getElementById(id);
+        if (el && el._flatpickr) { el._flatpickr.setDate(dateValue || null, true); }
+        else if (el) { el.value = dateValue ? dateValue : ''; }
     }
 
     // ==========================================
@@ -1023,8 +1048,8 @@
             if (sess) showApp(sess);
         } catch(e){}
 
-        try { document.getElementById('serviceDate').valueAsDate = new Date(); } catch(e){}
-        try { initBuddhistDateOverlays(); } catch(e){}
+        try { initBuddhistDatePickers(); } catch(e){}
+        try { setFpDate('serviceDate', new Date()); } catch(e){}
         try { generateFiscalYearOptions(); } catch(e){}
         
         try {
@@ -1371,12 +1396,12 @@
             Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: res.message, timer: 1500, showConfirmButton: false });
             form.reset();
             if(actionName === 'saveRecord') {
-                document.getElementById('serviceDate').valueAsDate = new Date();
+                setFpDate('serviceDate', new Date());
+                setFpDate('dobInput', null);
                 document.getElementById('province').value = "ราชบุรี"; populateDistrict();
                 document.getElementById('district').value = "ดำเนินสะดวก"; populateSubDistrict();
                 document.getElementById('financeFieldsContainer').classList.add('hidden');
                 document.getElementById('an-container').classList.add('hidden');
-                try { refreshDateOverlay('serviceDate'); refreshDateOverlay('dobInput'); } catch(e){}
             }
             if(actionName === 'saveFollowUpRecord') { 
                 document.getElementById('followUpModal').classList.add('hidden'); 
@@ -1518,8 +1543,7 @@
       document.getElementById('fu_old_dist').value = item.dist || '';
       document.getElementById('fu_old_subdist').value = item.subDist || '';
 
-      document.getElementById('fu_dob').value = item.dob || '';
-      try { refreshDateOverlay('fu_dob'); } catch(e){}
+      setFpDate('fu_dob', item.dob || null);
       document.getElementById('fu_edit_med').value = item.insurance || 'ประกันสุขภาพแห่งชาติ';
       document.getElementById('fu_edit_icd10').value = item.icd10 || '';
       document.getElementById('fu_edit_z').value = item.zCat || '';
@@ -1590,8 +1614,7 @@
       document.getElementById('fuFinanceTypeSelect').value = '';
       toggleFuFinanceDetails();
 
-      document.querySelector('input[name="serviceDateUpdate"]').valueAsDate = new Date();
-      try { refreshDateOverlay('serviceDateUpdate'); refreshDateOverlay('fu_dob'); } catch(e){}
+      setFpDate('serviceDateUpdate', new Date());
       document.getElementById('followUpModal').classList.remove('hidden');
     }
 
