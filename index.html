@@ -1002,10 +1002,25 @@
     // แก้ตัวเลขปีที่หัวปฏิทิน (Chrome/Flatpickr คำนวณเป็น ค.ศ. เสมอ) ให้เป็น พ.ศ. ทุกครั้งที่เปิด/เปลี่ยนเดือน/ปี
     function patchFlatpickrYear(instance) {
         if (instance && instance.currentYearElement) {
-            instance.currentYearElement.value = instance.currentYear + 543;
-            // ห้ามพิมพ์ตัวเลขปีเองโดยตรง (ต้องกดลูกศรขึ้น/ลงเท่านั้น) ไม่งั้นเลขที่พิมพ์ทับจะถูกตีความเป็นปี ค.ศ.
-            // ตรงๆ ทำให้ปีเพี้ยน (เช่น พิมพ์ต่อท้าย 2569 กลายเป็น 25699 ปี ค.ศ.)
-            instance.currentYearElement.setAttribute('readonly', 'readonly');
+            var yEl = instance.currentYearElement;
+            yEl.value = instance.currentYear + 543;
+            // ห้ามพิมพ์ตัวเลขปีเองโดยตรง (ต้องกดลูกศรขึ้น/ลงที่ปฏิทินเท่านั้น) ไม่งั้นเลขที่พิมพ์ทับ/ลบ
+            // จะถูกตีความเป็นปี ค.ศ. ตรงๆ ทำให้ปีเพี้ยน
+            // หมายเหตุ: Flatpickr สร้างช่องปีนี้ขึ้นใหม่ทุกครั้งที่วาดปฏิทินใหม่ (เปลี่ยนเดือน/ปี) จึงต้อง
+            // ตั้งค่าป้องกันซ้ำทุกครั้งที่ฟังก์ชันนี้ถูกเรียก ไม่ใช่ตั้งครั้งเดียวตอนเริ่ม (element เดิมจะหลุดการป้องกันไป)
+            yEl.setAttribute('readonly', 'readonly');
+            yEl.setAttribute('inputmode', 'none');
+            yEl.style.caretColor = 'transparent';
+            // ตัวการจริงของปีเพี้ยน: Flatpickr ดักฟัง keyup ที่ตัวครอบปฏิทิน (ไม่ใช่ที่ช่องปีตรงๆ) แล้วอ่านค่า
+            // "ตัวเลขที่กำลังแสดงอยู่" (ซึ่งเราแปลงเป็น พ.ศ. ไปแล้ว) มาตีความเป็นปี ค.ศ. ทันทีทุกครั้งที่กดคีย์
+            // อะไรก็ตามในช่องนี้ (ไม่ว่าจะพิมพ์ติดหรือไม่ก็ตาม) จึงบวก 543 ทบไปเรื่อยๆ จนเลขพุ่งกระฉูด
+            // ต้องสกัด keyup ไม่ให้ลอยขึ้นไปถึงตัวครอบปฏิทินเลย ส่วนลูกศรขึ้น/ลงยังทำงานปกติ (ใช้ event คนละทาง)
+            yEl.onkeydown = function (e) { e.preventDefault(); e.stopPropagation(); return false; };
+            yEl.onkeyup = function (e) { e.preventDefault(); e.stopPropagation(); return false; };
+            yEl.onwheel = function (e) { e.preventDefault(); return false; };
+            yEl.onpaste = function (e) { e.preventDefault(); return false; };
+            yEl.onbeforeinput = function (e) { e.preventDefault(); return false; };
+            yEl.oninput = function () { yEl.value = instance.currentYear + 543; };
         }
     }
     function createBuddhistDatePicker(id, extraOptions) {
