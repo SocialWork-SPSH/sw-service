@@ -999,28 +999,41 @@
         var y = date.getFullYear() + 543;
         return d + '/' + m + '/' + y;
     }
+    // พิมพ์ปีที่ช่องปีของปฏิทินเอง แล้วแปลงกลับเป็น ค.ศ. ให้ถูกต้อง (รองรับกรณีต้องเลื่อนปีย้อนหลังไปไกลๆ
+    // เช่น หาวันเกิดผู้สูงอายุ จะได้ไม่ต้องกดลูกศรทีละปี)
+    function commitYearInput(instance) {
+        var yEl = instance.currentYearElement;
+        var typedBE = parseInt(yEl.value, 10);
+        if (!isNaN(typedBE) && typedBE > 543) {
+            instance.changeYear(typedBE - 543); // พิมพ์เป็น พ.ศ. แล้วแปลงเป็น ค.ศ. ก่อนส่งให้ปฏิทินประมวลผล
+        } else {
+            yEl.value = instance.currentYear + 543; // พิมพ์ค่าที่ไม่สมเหตุสมผล คืนค่าปีปัจจุบันกลับไปแสดง
+        }
+    }
     // แก้ตัวเลขปีที่หัวปฏิทิน (Chrome/Flatpickr คำนวณเป็น ค.ศ. เสมอ) ให้เป็น พ.ศ. ทุกครั้งที่เปิด/เปลี่ยนเดือน/ปี
     function patchFlatpickrYear(instance) {
         if (instance && instance.currentYearElement) {
             var yEl = instance.currentYearElement;
             yEl.value = instance.currentYear + 543;
-            // ห้ามพิมพ์ตัวเลขปีเองโดยตรง (ต้องกดลูกศรขึ้น/ลงที่ปฏิทินเท่านั้น) ไม่งั้นเลขที่พิมพ์ทับ/ลบ
-            // จะถูกตีความเป็นปี ค.ศ. ตรงๆ ทำให้ปีเพี้ยน
             // หมายเหตุ: Flatpickr สร้างช่องปีนี้ขึ้นใหม่ทุกครั้งที่วาดปฏิทินใหม่ (เปลี่ยนเดือน/ปี) จึงต้อง
-            // ตั้งค่าป้องกันซ้ำทุกครั้งที่ฟังก์ชันนี้ถูกเรียก ไม่ใช่ตั้งครั้งเดียวตอนเริ่ม (element เดิมจะหลุดการป้องกันไป)
-            yEl.setAttribute('readonly', 'readonly');
-            yEl.setAttribute('inputmode', 'none');
-            yEl.style.caretColor = 'transparent';
-            // ตัวการจริงของปีเพี้ยน: Flatpickr ดักฟัง keyup ที่ตัวครอบปฏิทิน (ไม่ใช่ที่ช่องปีตรงๆ) แล้วอ่านค่า
-            // "ตัวเลขที่กำลังแสดงอยู่" (ซึ่งเราแปลงเป็น พ.ศ. ไปแล้ว) มาตีความเป็นปี ค.ศ. ทันทีทุกครั้งที่กดคีย์
-            // อะไรก็ตามในช่องนี้ (ไม่ว่าจะพิมพ์ติดหรือไม่ก็ตาม) จึงบวก 543 ทบไปเรื่อยๆ จนเลขพุ่งกระฉูด
-            // ต้องสกัด keyup ไม่ให้ลอยขึ้นไปถึงตัวครอบปฏิทินเลย ส่วนลูกศรขึ้น/ลงยังทำงานปกติ (ใช้ event คนละทาง)
-            yEl.onkeydown = function (e) { e.preventDefault(); e.stopPropagation(); return false; };
-            yEl.onkeyup = function (e) { e.preventDefault(); e.stopPropagation(); return false; };
-            yEl.onwheel = function (e) { e.preventDefault(); return false; };
-            yEl.onpaste = function (e) { e.preventDefault(); return false; };
-            yEl.onbeforeinput = function (e) { e.preventDefault(); return false; };
-            yEl.oninput = function () { yEl.value = instance.currentYear + 543; };
+            // ผูกอีเวนต์ซ้ำทุกครั้งที่ฟังก์ชันนี้ถูกเรียก ไม่ใช่ตั้งครั้งเดียวตอนเริ่ม (element เดิมจะหลุดการผูกไป)
+            //
+            // ต้นเหตุของปัญหาปีเพี้ยนเดิม: Flatpickr ดักฟัง "keyup" ที่ตัวครอบปฏิทิน (ไม่ใช่ที่ช่องปีตรงๆ)
+            // แล้วอ่าน "ตัวเลขที่กำลังแสดงอยู่" (ซึ่งเราแปลงเป็น พ.ศ. ไปแล้ว) มาตีความเป็นปี ค.ศ. ทันที
+            // ทุกครั้งที่ปล่อยคีย์ จึงยังคงปล่อยให้พิมพ์ได้ตามปกติ (ไม่ preventDefault ตอน keydown)
+            // แต่ stopPropagation ทั้ง keydown/keyup กันไม่ให้ลอยไปโดน handler เดิมของ Flatpickr ที่ตีความผิด
+            // แล้วเราแปลงค่าเองที่ปุ่ม Enter หรือตอนคลิกออกจากช่อง (blur) แทน
+            yEl.oninput = function (e) {
+                e.stopPropagation();
+                yEl.value = yEl.value.replace(/[^\d]/g, '').slice(0, 4); // อนุญาตเฉพาะตัวเลข ไม่เกิน 4 หลัก
+            };
+            yEl.onkeydown = function (e) { e.stopPropagation(); };
+            yEl.onkeyup = function (e) {
+                e.stopPropagation();
+                if (e.key === 'Enter') { commitYearInput(instance); yEl.blur(); }
+            };
+            yEl.onwheel = function (e) { e.preventDefault(); };
+            yEl.onblur = function () { commitYearInput(instance); };
         }
     }
     function createBuddhistDatePicker(id, extraOptions) {
