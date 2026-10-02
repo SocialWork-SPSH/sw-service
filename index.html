@@ -1003,6 +1003,9 @@
     function patchFlatpickrYear(instance) {
         if (instance && instance.currentYearElement) {
             instance.currentYearElement.value = instance.currentYear + 543;
+            // ห้ามพิมพ์ตัวเลขปีเองโดยตรง (ต้องกดลูกศรขึ้น/ลงเท่านั้น) ไม่งั้นเลขที่พิมพ์ทับจะถูกตีความเป็นปี ค.ศ.
+            // ตรงๆ ทำให้ปีเพี้ยน (เช่น พิมพ์ต่อท้าย 2569 กลายเป็น 25699 ปี ค.ศ.)
+            instance.currentYearElement.setAttribute('readonly', 'readonly');
         }
     }
     function createBuddhistDatePicker(id, extraOptions) {
@@ -1015,7 +1018,18 @@
             allowInput: false,
             disableMobile: true,
             locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.th) ? flatpickr.l10ns.th : undefined,
-            formatDate: function(date) { return toBuddhistDateStr(date); },
+            // สำคัญ: formatDate ถูกเรียกทั้งตอนจัดรูปแบบค่าจริงที่ใช้เก็บ/ส่งฟอร์ม (format ตรงกับ dateFormat ด้านบน คือ 'Y-m-d')
+            // และตอนจัดรูปแบบข้อความที่ผู้ใช้เห็นใน altInput ต้องคืนค่าค.ศ./ISO ปกติสำหรับกรณีแรกเท่านั้น
+            // ไม่เช่นนั้นค่าที่บันทึกจริงจะกลายเป็นข้อความ พ.ศ. ไปด้วย ทำให้คำนวณอายุ/บันทึกข้อมูลพัง
+            formatDate: function(date, format) {
+                if (format === 'Y-m-d') {
+                    var yy = date.getFullYear();
+                    var mm = ('0' + (date.getMonth() + 1)).slice(-2);
+                    var dd = ('0' + date.getDate()).slice(-2);
+                    return yy + '-' + mm + '-' + dd;
+                }
+                return toBuddhistDateStr(date);
+            },
             onReady: function(sd, ds, instance) { patchFlatpickrYear(instance); },
             onMonthChange: function(sd, ds, instance) { patchFlatpickrYear(instance); },
             onYearChange: function(sd, ds, instance) { patchFlatpickrYear(instance); },
