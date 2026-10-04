@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard สถิติสังคมสงเคราะห์ (สำหรับผู้บริหาร)</title><link rel="icon" type="image/png" href="logo-sw69.png">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+    :root { --primary: #3d82af; --primary-dark: #2c6385; --accent: #ff3f3e; }
+    .bg-theme { background-color: var(--primary) !important; }
+    .text-theme { color: var(--primary) !important; }
+    .hover-bg-theme:hover { background-color: var(--primary-dark) !important; }
+    .input-field { background-color: #ffffff; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 0.625rem 0.75rem; width: 100%; color: #1e293b; transition: all 0.2s; }
+    .input-field:focus { border-color: var(--primary) !important; outline: none; box-shadow: 0 0 0 3px rgba(61, 130, 175, 0.2) !important; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50">
+
+  <div class="max-w-7xl mx-auto p-4 md:p-8">
+
+    <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-center border-b pb-4 gap-2">
+      <h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3">📊 Dashboard สถิติสังคมสงเคราะห์ <span class="text-sm font-normal text-gray-400 block md:inline">(สำหรับผู้บริหาร — ไม่มีข้อมูลระบุตัวผู้ป่วย)</span></h1>
+      <button type="button" onclick="loadPublicDashboard()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center hover:bg-gray-50 self-start md:self-auto"><span class="mr-2">🔄</span> รีเฟรชข้อมูล</button>
+    </div>
+
+    <div id="loadingBanner" class="bg-blue-50 border border-blue-200 text-blue-700 text-sm font-bold rounded-xl p-4 mb-6">⏳ กำลังโหลดข้อมูล...</div>
+    <div id="errorBanner" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm font-bold rounded-xl p-4 mb-6"></div>
+
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="block text-xs font-bold text-gray-500 mb-1">ปีงบประมาณ</label><select id="dashSearchFY" class="input-field py-2" onchange="loadPublicDashboard()"><option value="">-- ทุกปีงบประมาณ --</option></select></div>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">เดือน</label>
+            <select id="dashSearchMonth" class="input-field py-2" onchange="loadPublicDashboard()">
+                <option value="">-- ทุกเดือน --</option><option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option><option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option><option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="flex border-b border-gray-200 mb-6 bg-white rounded-t-xl px-4 pt-2 shadow-sm">
+      <button type="button" id="tab-btn-dash-overview" class="py-3 px-5 border-b-4 font-bold text-[#3d82af] border-[#3d82af] transition hover:bg-gray-50" onclick="switchDashTab('overview')">📊 สถิติภาพรวม</button>
+      <button type="button" id="tab-btn-dash-finance" class="py-3 px-5 border-b-4 font-medium text-gray-500 border-transparent hover:text-[#3d82af] hover:bg-gray-50 transition" onclick="switchDashTab('finance')">💰 ข้อมูลการเงิน</button>
+    </div>
+
+    <div id="dash-tab-overview" class="block">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm col-span-2 md:col-span-1"><p class="text-[11px] font-bold text-blue-600 uppercase tracking-wide">ผู้ใช้บริการทั้งหมด</p><div class="flex items-baseline mt-1"><h3 class="text-3xl font-black text-blue-800" id="kpiTotal">0</h3><span class="text-xs text-blue-500 ml-1">ครั้ง</span></div></div>
+          <div class="bg-white p-4 rounded-xl border-b-4 border-[#3d82af] shadow-sm"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">ในเขต อ.ดำเนินสะดวก</p><h3 class="text-2xl font-black text-gray-800 mt-1" id="kpiLocIn">0</h3></div>
+          <div class="bg-white p-4 rounded-xl border-b-4 border-green-500 shadow-sm"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">ยุติบริการ</p><h3 class="text-2xl font-black text-green-600 mt-1" id="kpiClosed">0</h3></div>
+          <div class="bg-white p-4 rounded-xl border-b-4 border-yellow-400 shadow-sm"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">กำลังติดตาม</p><h3 class="text-2xl font-black text-yellow-500 mt-1" id="kpiTracking">0</h3></div>
+          <div class="bg-white p-4 rounded-xl border-b-4 border-red-500 shadow-sm"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">กำลังให้บริการ</p><h3 class="text-2xl font-black text-red-500 mt-1" id="kpiActive">0</h3></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สัดส่วนสัญชาติ</h3><div class="relative h-64"><canvas id="chartNationality"></canvas></div></div>
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">แผนภูมิพื้นที่ผู้รับบริการ</h3><div class="relative h-64"><canvas id="chartArea"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">ประเภทผู้ป่วย</h3><div class="relative h-64"><canvas id="chartPatientType"></canvas></div></div>
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">กลุ่มเป้าหมาย</h3><div class="relative h-64"><canvas id="chartTargetGroup"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติมูลปัญหาทางสังคม</h3><div class="relative h-80"><canvas id="chartProblems"></canvas></div></div>
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติการให้บริการ</h3><div class="relative h-80"><canvas id="chartInterventions"></canvas></div></div>
+        </div>
+    </div>
+
+    <!-- Tab 2: ข้อมูลการเงิน -->
+    <div id="dash-tab-finance" class="hidden">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+          <h3 class="font-bold text-red-700 mb-4 border-b pb-2">💰 ภาพรวมสถิติการอนุเคราะห์ค่ารักษาพยาบาลและค้างชำระ</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="bg-gray-50 p-4 rounded-xl text-center border border-gray-100"><h4 class="text-xs font-bold text-gray-500">ค่ารักษาเต็มจำนวน</h4><p id="dashTotalCost" class="text-xl font-black text-gray-800 mt-1">0.00 ฿</p></div>
+              <div class="bg-blue-50 p-4 rounded-xl text-center border border-blue-100"><h4 class="text-xs font-bold text-blue-700">ชำระเอง</h4><p id="dashSelfPay" class="text-xl font-black text-blue-800 mt-1">0.00 ฿</p></div>
+              <div class="bg-green-50 p-4 rounded-xl text-center border border-green-100"><h4 class="text-xs font-bold text-green-700">ยอดอนุเคราะห์</h4><p id="dashWelfare" class="text-xl font-black text-green-800 mt-1">0.00 ฿</p></div>
+              <div class="bg-red-50 p-4 rounded-xl text-center border border-red-100"><h4 class="text-xs font-bold text-red-700">ยอดค้างชำระ</h4><p id="dashDebt" class="text-xl font-black text-red-800 mt-1">0.00 ฿</p></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+           <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-red-500 pl-2">สัดส่วนประเภทบริการการเงิน</h3><div class="relative h-64"><canvas id="chartFinanceType"></canvas></div></div>
+           <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-red-500 pl-2">หอผู้ป่วยที่มีการสงเคราะห์สูงสุด</h3><div class="relative h-64"><canvas id="chartFinanceWard"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">📍 ที่อยู่ผู้รับบริการ (การเงิน)</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableAddress" class="divide-y divide-gray-100"></tbody></table></div></div>
+           <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🎯 กลุ่มเป้าหมาย (การเงิน)</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableTarget" class="divide-y divide-gray-100"></tbody></table></div></div>
+           <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🌎 สัญชาติ (การเงิน)</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableNation" class="divide-y divide-gray-100"></tbody></table></div></div>
+           <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🩺 โรค ICD10 (การเงิน)</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableICD" class="divide-y divide-gray-100"></tbody></table></div></div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400 mt-8">ลิงก์นี้ไม่ต้องเข้าสู่ระบบและไม่แสดงข้อมูลระบุตัวผู้ป่วยรายบุคคล (HN / ชื่อ-สกุล) แต่อย่างใด &mdash; กรุณาอย่าเผยแพร่ลิงก์นี้ต่อสาธารณะ</p>
+  </div>
+
+  <script>
+    // ==========================================
+    // GAS JSON API CONFIG (เรียกผ่าน JSONP) — หน้านี้ไม่ต้อง login
+    // ==========================================
+    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwHAK-1MIuPTvnzBZq0oz8coWlKlg4FVG8zqUgNIdWuCwwmis4O2xYYpGYhmHTT5USIXg/exec';
+    var GAS_API_KEY = 'swdn622';
+
+    var __gasJsonpSeq = 0;
+    function gasJsonpRequest(extraParams) {
+      return new Promise(function(resolve, reject) {
+        var cbName = '__gasCb_' + (__gasJsonpSeq++) + '_' + Date.now();
+        var script = document.createElement('script');
+        var timeoutId;
+
+        function cleanup() {
+          delete window[cbName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          if (timeoutId) clearTimeout(timeoutId);
+        }
+
+        window[cbName] = function(data) {
+          cleanup();
+          if (data && data.success === false) reject(new Error(data.error || 'API error'));
+          else resolve(data);
+        };
+
+        timeoutId = setTimeout(function() {
+          cleanup();
+          reject(new Error('หมดเวลาเชื่อมต่อกับเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง'));
+        }, 30000);
+
+        var qs = ['key=' + encodeURIComponent(GAS_API_KEY), 'callback=' + encodeURIComponent(cbName)];
+        Object.keys(extraParams).forEach(function(k) {
+          qs.push(encodeURIComponent(k) + '=' + encodeURIComponent(extraParams[k]));
+        });
+
+        script.src = GAS_API_URL + '?' + qs.join('&');
+        script.onerror = function() {
+          cleanup();
+          reject(new Error('ไม่สามารถเชื่อมต่อ API ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'));
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    function generateFiscalYearOptions() {
+        var currentYear = new Date().getFullYear();
+        var currentMonth = new Date().getMonth() + 1;
+        var currentFY = currentYear > 2500 ? currentYear : currentYear + 543;
+        if (currentMonth >= 10) currentFY += 1;
+
+        var el = document.getElementById('dashSearchFY');
+        el.innerHTML = '<option value="">-- ทุกปีงบประมาณ --</option>';
+        for (var y = currentFY; y >= 2565; y--) {
+            var opt = document.createElement('option');
+            opt.value = y; opt.innerHTML = 'ปีงบฯ ' + y; el.appendChild(opt);
+        }
+    }
+
+    function switchDashTab(tabId) {
+      document.getElementById('dash-tab-overview').classList.add('hidden'); document.getElementById('dash-tab-finance').classList.add('hidden');
+      document.getElementById('tab-btn-dash-overview').className = "py-3 px-5 border-b-4 font-medium text-gray-500 border-transparent hover:text-[#3d82af] hover:bg-gray-50 transition";
+      document.getElementById('tab-btn-dash-finance').className = "py-3 px-5 border-b-4 font-medium text-gray-500 border-transparent hover:text-[#3d82af] hover:bg-gray-50 transition";
+      document.getElementById('dash-tab-' + tabId).classList.remove('hidden'); document.getElementById('tab-btn-dash-' + tabId).className = "py-3 px-5 border-b-4 font-bold text-[#3d82af] border-[#3d82af] transition hover:bg-gray-50";
+    }
+
+    var chartsObj = {};
+    function drawChart(id, type, labels, data, colors, options) {
+        var ctx = document.getElementById(id).getContext('2d');
+        if(chartsObj[id]) chartsObj[id].destroy();
+
+        var config = {
+            type: type,
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderRadius: (type==='bar'?4:0) }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        };
+        if(options && options.plugins) config.options.plugins = options.plugins;
+        if(options && options.indexAxis) config.options.indexAxis = options.indexAxis;
+
+        chartsObj[id] = new Chart(ctx, config);
+    }
+
+    function fmt(num) { return (num || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function loadPublicDashboard() {
+      var fyFilter = document.getElementById('dashSearchFY').value;
+      var moFilter = document.getElementById('dashSearchMonth').value;
+      var loadingEl = document.getElementById('loadingBanner');
+      var errEl = document.getElementById('errorBanner');
+      loadingEl.classList.remove('hidden'); errEl.classList.add('hidden');
+
+      gasJsonpRequest({ action: 'getPublicDashboardSummary', fy: fyFilter, mo: moFilter }).then(function(s) {
+        loadingEl.classList.add('hidden');
+
+        document.getElementById('kpiTotal').innerText = s.total; document.getElementById('kpiLocIn').innerText = s.locIn;
+        document.getElementById('kpiClosed').innerText = s.closed; document.getElementById('kpiTracking').innerText = s.tracking; document.getElementById('kpiActive').innerText = s.active;
+
+        document.getElementById('dashTotalCost').innerText = fmt(s.tc) + ' ฿'; document.getElementById('dashSelfPay').innerText = fmt(s.sp) + ' ฿';
+        document.getElementById('dashWelfare').innerText = fmt(s.wf) + ' ฿'; document.getElementById('dashDebt').innerText = fmt(s.db) + ' ฿';
+
+        drawChart('chartNationality', 'pie', Object.keys(s.nats), Object.keys(s.nats).map(function(k){return s.nats[k];}), ['#ffa500', '#ff3f3e', '#3d82af', '#2c6385'], { plugins: { legend: { position: 'bottom' } } });
+        drawChart('chartArea', 'bar', Object.keys(s.areas), Object.keys(s.areas).map(function(k){return s.areas[k];}), ['#10b981', '#f59e0b', '#ef4444'], { plugins: { legend: { display: false } } });
+        drawChart('chartPatientType', 'pie', Object.keys(s.pTypes), Object.keys(s.pTypes).map(function(k){return s.pTypes[k];}), ['#3d82af', '#2c6385', '#ff3f3e', '#ffa500', '#94a3b8'], { plugins: { legend: { position: 'right' } } });
+
+        var tgSorted = Object.keys(s.targets).map(function(k){return [k, s.targets[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
+        drawChart('chartTargetGroup', 'bar', tgSorted.map(function(x){return x[0].substring(0,15)+'...';}), tgSorted.map(function(x){return x[1];}), '#3d82af', { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+        var pSorted = Object.keys(s.probs).map(function(k){return [k, s.probs[k]];}).sort(function(a,b){return a[0].localeCompare(b[0]);});
+        drawChart('chartProblems', 'bar', pSorted.map(function(x){return x[0];}), pSorted.map(function(x){return x[1];}), '#2c6385', { plugins: { legend: { display: false } } });
+
+        var iSorted = Object.keys(s.intvs).map(function(k){return [k, s.intvs[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 8);
+        drawChart('chartInterventions', 'bar', iSorted.map(function(x){return x[0].substring(0,25)+'...';}), iSorted.map(function(x){return x[1];}), '#ff3f3e', { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+        drawChart('chartFinanceType', 'pie', Object.keys(s.finTypes), Object.keys(s.finTypes).map(function(k){return s.finTypes[k];}), ['#10b981', '#ef4444', '#f59e0b'], { plugins: { legend: { position: 'bottom' } } });
+        var fwSorted = Object.keys(s.finWards).map(function(k){return [k, s.finWards[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
+        drawChart('chartFinanceWard', 'bar', fwSorted.map(function(x){return x[0];}), fwSorted.map(function(x){return x[1];}), '#f59e0b', { plugins: { legend: { display: false } } });
+
+        function renderTbl(id, obj) {
+           var tbody = document.getElementById(id); tbody.innerHTML = '';
+           var sorted = Object.keys(obj).map(function(k){return [k, obj[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 10);
+           for(var i=0; i<sorted.length; i++) {
+               tbody.innerHTML += '<tr><td class="py-2 pr-2 border-b border-gray-100">' + sorted[i][0] + '</td><td class="py-2 pl-2 border-b border-gray-100 font-bold text-right w-1/4">' + sorted[i][1] + '</td></tr>';
+           }
+        }
+        renderTbl('finTableAddress', s.finAddr); renderTbl('finTableTarget', s.finTarget);
+        renderTbl('finTableNation', s.finNat); renderTbl('finTableICD', s.finIcd);
+
+      }).catch(function(err) {
+        loadingEl.classList.add('hidden');
+        errEl.classList.remove('hidden'); errEl.innerText = '⚠️ เกิดข้อผิดพลาด: ' + err.toString();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      generateFiscalYearOptions();
+      loadPublicDashboard();
+    });
+  </script>
+</body>
+</html>
