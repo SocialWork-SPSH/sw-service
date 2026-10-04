@@ -158,9 +158,12 @@
                 <div id="an-container" class="hidden"><label class="block text-sm font-bold text-gray-700 mb-1">AN</label><input type="text" name="an" class="input-field" placeholder="ระบุเลข AN"></div>
                 <div>
                   <label class="block text-sm font-bold text-gray-700 mb-1">ห้องตรวจ / หอผู้ป่วย</label>
-                  <select name="ward" class="input-field" required>
-                    <option value="">-- เลือกหอผู้ป่วย --</option><option value="ER">ER</option><option value="ICU">ICU</option><option value="OPD ฟื้นฟู">OPD ฟื้นฟู</option><option value="OR">OR</option><option value="Stroke Unit">Stroke Unit</option><option value="กุมารเวชกรรม">กุมารเวชกรรม</option><option value="คลินิกสังคมสงเคราะห์">คลินิกสังคมสงเคราะห์</option><option value="จิตเวช">จิตเวช</option><option value="ตา หู คอ จมูก (EENT)">ตา หู คอ จมูก (EENT)</option><option value="ไตเทียม">ไตเทียม</option><option value="ทันตกรรม">ทันตกรรม</option><option value="ทารกแรกเกิด (SNB)">ทารกแรกเกิด (SNB)</option><option value="ศสม.">ศสม.</option><option value="ศัลยกรรมกระดูก">ศัลยกรรมกระดูก</option><option value="ศัลยกรรมชาย">ศัลยกรรมชาย</option><option value="ศูนย์บริจาคอวัยวะ">ศูนย์บริจาคอวัยวะ</option><option value="สูตินรีเวชกรรม">สูตินรีเวชกรรม</option><option value="ห้องคลอด">ห้องคลอด</option><option value="ห้องตรวจ OPD">ห้องตรวจ OPD</option><option value="หอผู้ป่วยพิเศษ">หอผู้ป่วยพิเศษ</option><option value="อายุรกรรมชาย">อายุรกรรมชาย</option><option value="อายุรกรรมหญิง">อายุรกรรมหญิง</option>
+                  <select name="ward" id="wardSelect" class="input-field" required onchange="toggleWardOther()">
+                    <option value="">-- เลือกหอผู้ป่วย --</option><option value="ER">ER</option><option value="ICU">ICU</option><option value="OPD ฟื้นฟู">OPD ฟื้นฟู</option><option value="OR">OR</option><option value="Stroke Unit">Stroke Unit</option><option value="กุมารเวชกรรม">กุมารเวชกรรม</option><option value="คลินิกสังคมสงเคราะห์">คลินิกสังคมสงเคราะห์</option><option value="จิตเวช">จิตเวช</option><option value="ตา หู คอ จมูก (EENT)">ตา หู คอ จมูก (EENT)</option><option value="ไตเทียม">ไตเทียม</option><option value="ทันตกรรม">ทันตกรรม</option><option value="ทารกแรกเกิด (SNB)">ทารกแรกเกิด (SNB)</option><option value="ศสม.">ศสม.</option><option value="ศัลยกรรมกระดูก">ศัลยกรรมกระดูก</option><option value="ศัลยกรรมชาย">ศัลยกรรมชาย</option><option value="ศูนย์บริจาคอวัยวะ">ศูนย์บริจาคอวัยวะ</option><option value="สูตินรีเวชกรรม">สูตินรีเวชกรรม</option><option value="ห้องคลอด">ห้องคลอด</option><option value="ห้องตรวจ OPD">ห้องตรวจ OPD</option><option value="หอผู้ป่วยพิเศษ">หอผู้ป่วยพิเศษ</option><option value="อายุรกรรมชาย">อายุรกรรมชาย</option><option value="อายุรกรรมหญิง">อายุรกรรมหญิง</option><option value="อื่นๆ">อื่นๆ (ระบุ)</option>
                   </select>
+                  <div id="wardOtherContainer" class="hidden mt-2">
+                    <input type="text" id="wardOtherInput" name="wardOther" class="input-field" placeholder="ระบุห้องตรวจ / หอผู้ป่วย">
+                  </div>
                 </div>
               </div>
             </div>
@@ -246,10 +249,10 @@
                          <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1.5 rounded border hover:border-red-300"><input type="checkbox" name="finType" value="อน.ผู้มีปัญหาสิทธิ์" class="form-checkbox text-red-600 rounded"> <span class="text-xs font-bold text-gray-700">อน.ผู้มีปัญหาสิทธิ์</span></label>
                      </div>
                   </div>
-                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ค่ารักษา (เต็ม)</label><input type="number" name="totalCost" class="input-field"></div>
-                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ชำระเอง</label><input type="number" name="copay" class="input-field"></div>
-                  <div><label class="block text-sm font-bold text-gray-700 mb-1">อนุเคราะห์</label><input type="number" name="assistAmount" class="input-field"></div>
-                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ค้างชำระ (Balance)</label><input type="number" name="balance" class="input-field"></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ค่ารักษา (เต็ม)</label><input type="number" name="totalCost" step="0.01" class="input-field"></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ชำระเอง</label><input type="number" name="copay" step="0.01" class="input-field"></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">อนุเคราะห์</label><input type="number" name="assistAmount" step="0.01" class="input-field"></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">ค้างชำระ (Balance)</label><input type="number" name="balance" step="0.01" class="input-field"></div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">สิทธิอื่น (ถ้ามี)</label><input type="text" name="otherRights" class="input-field"></div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">จำนวนวันนอน (วัน)</label><input type="number" name="los" class="input-field"></div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">หน่วยงาน</label><input type="text" name="agency" class="input-field"></div>
@@ -402,10 +405,10 @@
                            <label class="flex items-center space-x-2 cursor-pointer bg-white px-2 py-1.5 rounded border hover:border-red-300"><input type="checkbox" name="finType" value="อน.ผู้มีปัญหาสิทธิ์" class="form-checkbox text-red-600 rounded"> <span class="text-xs font-bold text-gray-700">อน.ผู้มีปัญหาสิทธิ์</span></label>
                          </div>
                          <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
-                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ค่ารักษาทั้งหมด</label><input type="number" name="totalCost" class="w-full border rounded p-1.5 text-xs"></div>
-                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ใช้สิทธิได้/ร่วมจ่าย</label><input type="number" name="copay" class="w-full border rounded p-1.5 text-xs"></div>
-                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">อนุเคราะห์</label><input type="number" name="assistAmount" class="w-full border rounded p-1.5 text-xs"></div>
-                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ค้างชำระ</label><input type="number" name="balance" class="w-full border rounded p-1.5 text-xs"></div>
+                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ค่ารักษาทั้งหมด</label><input type="number" name="totalCost" step="0.01" class="w-full border rounded p-1.5 text-xs"></div>
+                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ใช้สิทธิได้/ร่วมจ่าย</label><input type="number" name="copay" step="0.01" class="w-full border rounded p-1.5 text-xs"></div>
+                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">อนุเคราะห์</label><input type="number" name="assistAmount" step="0.01" class="w-full border rounded p-1.5 text-xs"></div>
+                           <div><label class="block text-[10px] font-bold text-gray-600 mb-1">ค้างชำระ</label><input type="number" name="balance" step="0.01" class="w-full border rounded p-1.5 text-xs"></div>
                            <div><label class="block text-[10px] font-bold text-gray-600 mb-1">หน่วยงาน</label><input type="text" name="agency" class="w-full border rounded p-1.5 text-xs"></div>
                            <div><label class="block text-[10px] font-bold text-gray-600 mb-1">หมายเหตุ</label><input type="text" name="finNote" class="w-full border rounded p-1.5 text-xs"></div>
                          </div>
@@ -1189,8 +1192,24 @@
         var sel = document.getElementById('patientType');
         var box = document.getElementById('an-container');
         if(!sel || !box) return;
-        if (sel.value.indexOf('IPD') !== -1) { box.classList.remove('hidden'); } 
+        if (sel.value.indexOf('IPD') !== -1) { box.classList.remove('hidden'); }
         else { box.classList.add('hidden'); var inp = box.querySelector('input'); if(inp) inp.value = ''; }
+    }
+
+    // แสดงช่องให้พิมพ์รายละเอียดเมื่อเลือก "อื่นๆ (ระบุ)" ที่ห้องตรวจ/หอผู้ป่วย
+    function toggleWardOther() {
+        var sel = document.getElementById('wardSelect');
+        var box = document.getElementById('wardOtherContainer');
+        var inp = document.getElementById('wardOtherInput');
+        if (!sel || !box || !inp) return;
+        if (sel.value === 'อื่นๆ') {
+            box.classList.remove('hidden');
+            inp.setAttribute('required', 'required');
+        } else {
+            box.classList.add('hidden');
+            inp.removeAttribute('required');
+            inp.value = '';
+        }
     }
 
     function checkNationality() {
@@ -1411,10 +1430,14 @@
       btn.disabled = true; btn.innerHTML = '⏳ กำลังบันทึก...';
       Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
 
-      var fd = new FormData(form); 
+      var fd = new FormData(form);
       var data = {};
       fd.forEach(function(value, key){ data[key] = value; });
-      
+
+      // ถ้าเลือก "อื่นๆ (ระบุ)" ที่ห้องตรวจ/หอผู้ป่วย ให้ใช้ข้อความที่พิมพ์แทนคำว่า "อื่นๆ" ก่อนบันทึก
+      if (data.ward === 'อื่นๆ' && data.wardOther) { data.ward = String(data.wardOther).trim(); }
+      delete data.wardOther;
+
       var socialObj = {};
       var allSocial = fd.getAll('socialProb');
       for(var i=0; i<allSocial.length; i++) {
@@ -1444,6 +1467,7 @@
                 document.getElementById('district').value = "ดำเนินสะดวก"; populateSubDistrict();
                 document.getElementById('financeFieldsContainer').classList.add('hidden');
                 document.getElementById('an-container').classList.add('hidden');
+                try { toggleWardOther(); } catch(e){}
             }
             if(actionName === 'saveFollowUpRecord') { 
                 document.getElementById('followUpModal').classList.add('hidden'); 
