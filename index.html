@@ -680,18 +680,24 @@
     // ฐานข้อมูล "หมวด Z" (ICD-10 Z-code ปัญหาทางสังคม) — ย้ายไปเก็บที่ฝั่งเซิร์ฟเวอร์ (ชีต ZCategory)
     // ไม่ฝังไว้ใน index.html เพื่อไม่ให้หน้าเว็บหนักและโหลดช้า โหลดแบบ lazy (เฉพาะตอนต้องใช้) ผ่าน action getZCategoryList แทน
     // ==========================================
-    var zCategoryCache = null;        // null = ยังไม่เคยโหลด, array = โหลดสำเร็จแล้ว (แคชไว้ใช้ซ้ำ ไม่ต้องยิง API ทุกครั้ง)
+    var zCategoryCache = null;        // null = ยังไม่เคยโหลดสำเร็จ, array = โหลดสำเร็จแล้ว (แคชไว้ใช้ซ้ำ ไม่ต้องยิง API ทุกครั้ง)
+    var zCategoryLoadError = null;    // เก็บข้อความ error ล่าสุดไว้แยกจากกรณี "โหลดสำเร็จแต่ไม่มีรายการตรงกัน"
     var zCategoryLoadingPromise = null;
 
     function loadZCategoryDB() {
         if (zCategoryCache !== null) return Promise.resolve(zCategoryCache);
         if (zCategoryLoadingPromise) return zCategoryLoadingPromise;
+        zCategoryLoadError = null;
         zCategoryLoadingPromise = gasApiGet('getZCategoryList').then(function(data) {
             zCategoryCache = Array.isArray(data) ? data : [];
+            zCategoryLoadingPromise = null;
             return zCategoryCache;
-        }).catch(function() {
-            zCategoryCache = []; // โหลดไม่สำเร็จ (เช่น เน็ตหลุด) ให้พิมพ์เองได้ตามปกติ ไม่ขึ้นตัวเลือก
-            return zCategoryCache;
+        }).catch(function(err) {
+            // โหลดไม่สำเร็จ (ยังไม่ได้ Deploy Apps Script เวอร์ชันใหม่ / เน็ตหลุด ฯลฯ) — "ไม่" แคชเป็นลิสต์ว่างถาวร
+            // เพื่อให้ลองโหลดใหม่ได้ทุกครั้งที่กดเข้าช่องอีก แทนที่จะค้างว่า "ไม่พบ" ตลอดไปทั้งที่จริง ๆ ยังไม่เคยโหลดสำเร็จเลย
+            zCategoryLoadError = (err && err.message) ? err.message : 'โหลดฐานข้อมูลไม่สำเร็จ';
+            zCategoryLoadingPromise = null;
+            return null;
         });
         return zCategoryLoadingPromise;
     }
@@ -719,11 +725,18 @@
             if (!kw) { box.classList.add('hidden'); box.innerHTML = ''; return; }
 
             if (zCategoryCache === null) {
-                // ยังโหลดฐานข้อมูลไม่เสร็จ (ครั้งแรกที่ใช้งาน) แสดงสถานะกำลังโหลด แล้วแสดงผลซ้ำอัตโนมัติเมื่อโหลดเสร็จ
+                // ยังไม่เคยโหลดฐานข้อมูลสำเร็จ (ครั้งแรกที่ใช้งาน หรือครั้งก่อนโหลดพลาด) — แสดงสถานะกำลังโหลด/ลองใหม่ แล้วแสดงผลซ้ำอัตโนมัติเมื่อโหลดเสร็จ
                 box.innerHTML = '<div class="px-3 py-2 text-xs text-gray-400">⏳ กำลังโหลดฐานข้อมูลหมวด Z...</div>';
                 box.classList.remove('hidden');
-                loadZCategoryDB().then(function() {
-                    if (document.activeElement === input) renderMatches(input.value);
+                loadZCategoryDB().then(function(result) {
+                    if (document.activeElement !== input) return;
+                    if (result === null) {
+                        // โหลดไม่สำเร็จจริง ๆ (ไม่ใช่แค่ "ไม่พบที่ตรงกัน") แจ้งให้ชัดเจนแยกจากกรณีไม่พบรายการ
+                        box.innerHTML = '<div class="px-3 py-2 text-xs text-red-500">⚠️ โหลดฐานข้อมูลหมวด Z ไม่สำเร็จ (ตรวจสอบว่า Deploy Apps Script เวอร์ชันล่าสุดแล้วหรือยัง) — พิมพ์เองได้ตามปกติ กดช่องนี้อีกครั้งเพื่อลองใหม่</div>';
+                        box.classList.remove('hidden');
+                    } else {
+                        renderMatches(input.value);
+                    }
                 });
                 return;
             }
