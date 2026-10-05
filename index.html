@@ -196,7 +196,7 @@
                     </select>
                   </div>
                   <div><label class="block text-sm font-bold text-gray-700 mb-1">โรค (ICD10)</label><input type="text" name="icd10" class="input-field" placeholder="ระบุชื่อโรค หรือรหัส"></div>
-                  <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวด Z</label><input type="text" name="zCategory" class="input-field" placeholder="ระบุหมวด Z (ถ้ามี)"></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวด Z</label><input type="text" id="zCategoryInput" name="zCategory" class="input-field" placeholder="พิมพ์ค้นหา เช่น Z55 หรือ การศึกษา" autocomplete="off"></div>
                 </div>
 
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -369,7 +369,7 @@
                          </select>
                        </div>
                        <div><label class="block text-xs font-bold text-gray-700 mb-1">ICD10</label><input type="text" id="fu_edit_icd10" name="fu_edit_icd10" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs"></div>
-                       <div><label class="block text-xs font-bold text-gray-700 mb-1">หมวด Z</label><input type="text" id="fu_edit_z" name="fu_edit_z" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs"></div>
+                       <div><label class="block text-xs font-bold text-gray-700 mb-1">หมวด Z</label><input type="text" id="fu_edit_z" name="fu_edit_z" class="w-full border rounded p-2 focus:border-[#3d82af] text-xs" placeholder="พิมพ์ค้นหา เช่น Z55 หรือ การศึกษา" autocomplete="off"></div>
                     </div>
                   </div>
                 </div>
@@ -676,6 +676,102 @@
   </div><!-- /#appShell -->
 
   <script>
+    // ==========================================
+    // ฐานข้อมูล "หมวด Z" (ICD-10 Z-code ปัญหาทางสังคม) — ย้ายไปเก็บที่ฝั่งเซิร์ฟเวอร์ (ชีต ZCategory)
+    // ไม่ฝังไว้ใน index.html เพื่อไม่ให้หน้าเว็บหนักและโหลดช้า โหลดแบบ lazy (เฉพาะตอนต้องใช้) ผ่าน action getZCategoryList แทน
+    // ==========================================
+    var zCategoryCache = null;        // null = ยังไม่เคยโหลด, array = โหลดสำเร็จแล้ว (แคชไว้ใช้ซ้ำ ไม่ต้องยิง API ทุกครั้ง)
+    var zCategoryLoadingPromise = null;
+
+    function loadZCategoryDB() {
+        if (zCategoryCache !== null) return Promise.resolve(zCategoryCache);
+        if (zCategoryLoadingPromise) return zCategoryLoadingPromise;
+        zCategoryLoadingPromise = gasApiGet('getZCategoryList').then(function(data) {
+            zCategoryCache = Array.isArray(data) ? data : [];
+            return zCategoryCache;
+        }).catch(function() {
+            zCategoryCache = []; // โหลดไม่สำเร็จ (เช่น เน็ตหลุด) ให้พิมพ์เองได้ตามปกติ ไม่ขึ้นตัวเลือก
+            return zCategoryCache;
+        });
+        return zCategoryLoadingPromise;
+    }
+
+    // คอมโพเนนต์ช่องค้นหาแบบพิมพ์บางส่วนแล้วแสดงตัวเลือกที่ตรงกัน (Autocomplete) ใช้กับฟิลด์ "หมวด Z"
+    // inputId: id ของ <input type="text"> ที่ต้องการติดระบบค้นหานี้
+    function initZCategoryAutocomplete(inputId) {
+        var input = document.getElementById(inputId);
+        if (!input || input._zacInit) return;
+        input._zacInit = true;
+
+        var wrap = document.createElement('div');
+        wrap.className = 'relative';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        var box = document.createElement('div');
+        box.className = 'absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto custom-scrollbar hidden';
+        wrap.appendChild(box);
+
+        var activeIdx = -1, currentMatches = [];
+
+        function renderMatches(keyword) {
+            var kw = keyword.trim().toLowerCase();
+            if (!kw) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+
+            if (zCategoryCache === null) {
+                // ยังโหลดฐานข้อมูลไม่เสร็จ (ครั้งแรกที่ใช้งาน) แสดงสถานะกำลังโหลด แล้วแสดงผลซ้ำอัตโนมัติเมื่อโหลดเสร็จ
+                box.innerHTML = '<div class="px-3 py-2 text-xs text-gray-400">⏳ กำลังโหลดฐานข้อมูลหมวด Z...</div>';
+                box.classList.remove('hidden');
+                loadZCategoryDB().then(function() {
+                    if (document.activeElement === input) renderMatches(input.value);
+                });
+                return;
+            }
+
+            currentMatches = zCategoryCache.filter(function(z) {
+                return z.c.toLowerCase().indexOf(kw) !== -1 || z.d.toLowerCase().indexOf(kw) !== -1;
+            }).slice(0, 20);
+            activeIdx = -1;
+            if (currentMatches.length === 0) {
+                box.innerHTML = '<div class="px-3 py-2 text-xs text-gray-400">ไม่พบหมวด Z ที่ตรงกัน (พิมพ์เองได้ตามปกติ)</div>';
+                box.classList.remove('hidden');
+                return;
+            }
+            box.innerHTML = currentMatches.map(function(z, i) {
+                return '<div data-idx="' + i + '" class="zac-item px-3 py-2 text-xs cursor-pointer hover:bg-blue-50 border-b border-gray-50 last:border-0">' +
+                       '<span class="font-bold text-[#3d82af]">' + z.c + '</span> <span class="text-gray-700">' + z.d + '</span></div>';
+            }).join('');
+            box.classList.remove('hidden');
+        }
+
+        function selectMatch(z) {
+            input.value = z.c + ' - ' + z.d;
+            box.classList.add('hidden');
+            box.innerHTML = '';
+        }
+
+        input.addEventListener('input', function() { renderMatches(input.value); });
+        input.addEventListener('focus', function() { loadZCategoryDB(); if (input.value.trim()) renderMatches(input.value); });
+        input.addEventListener('blur', function() { setTimeout(function() { box.classList.add('hidden'); }, 150); });
+        input.addEventListener('keydown', function(e) {
+            if (box.classList.contains('hidden') || currentMatches.length === 0) return;
+            var items = box.querySelectorAll('.zac-item');
+            if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
+            else if (e.key === 'Enter') { if (activeIdx >= 0) { e.preventDefault(); selectMatch(currentMatches[activeIdx]); } return; }
+            else if (e.key === 'Escape') { box.classList.add('hidden'); return; }
+            else return;
+            items.forEach(function(el, i) { el.classList.toggle('bg-blue-50', i === activeIdx); });
+            if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+        });
+        box.addEventListener('mousedown', function(e) {
+            var item = e.target.closest('.zac-item');
+            if (!item) return;
+            e.preventDefault();
+            selectMatch(currentMatches[parseInt(item.getAttribute('data-idx'), 10)]);
+        });
+    }
+
     // ==========================================
     // GAS JSON API CONFIG (เรียกผ่าน JSONP)
     // ==========================================
@@ -1096,6 +1192,7 @@
         try { initBuddhistDatePickers(); } catch(e){}
         try { setFpDate('serviceDate', new Date()); } catch(e){}
         try { generateFiscalYearOptions(); } catch(e){}
+        try { initZCategoryAutocomplete('zCategoryInput'); initZCategoryAutocomplete('fu_edit_z'); } catch(e){}
         
         try {
             generateAccordion(socialProblemsList, 'socialProblemContainer', 'socialProb', 'text-[#3d82af] focus:ring-[#3d82af]', 'bg-[#3d82af]');
