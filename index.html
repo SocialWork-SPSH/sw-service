@@ -2146,15 +2146,15 @@
                 if (row[i] && String(row[i]).trim() !== "") {
                     var pArr = String(row[i]).split(',');
                     for (var pa = 0; pa < pArr.length; pa++) {
-                        var pKey = pArr[pa].trim().split(' ')[0].trim();
+                        var pKey = pArr[pa].trim().replace(/^['’]+\s*/, '').split(' ')[0].trim();
                         if (pKey) probs[pKey] = (probs[pKey] || 0) + 1;
                     }
                 }
             }
-            if (row[20]) { 
+            if (row[20]) {
                 var vArr = row[20].split(',');
                 for(var a=0; a<vArr.length; a++) {
-                    var txt = vArr[a].trim(); if(txt) intvs[txt] = (intvs[txt] || 0) + 1; 
+                    var txt = vArr[a].trim().replace(/^['’]+\s*/, ''); if(txt) intvs[txt] = (intvs[txt] || 0) + 1;
                 }
             }
         }
