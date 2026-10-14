@@ -2142,10 +2142,14 @@
                var icd = row[18] || 'ไม่ระบุ'; finIcd[icd] = (finIcd[icd] || 0) + 1;
             }
 
-            for (var i = 30; i <= 46; i++) { 
-                if (row[i] && String(row[i]).trim() !== "") { 
-                    var key = String(row[i]).split(' ')[0]; probs[key] = (probs[key] || 0) + 1; 
-                } 
+            for (var i = 30; i <= 46; i++) {
+                if (row[i] && String(row[i]).trim() !== "") {
+                    var pArr = String(row[i]).split(',');
+                    for (var pa = 0; pa < pArr.length; pa++) {
+                        var pKey = pArr[pa].trim().split(' ')[0].trim();
+                        if (pKey) probs[pKey] = (probs[pKey] || 0) + 1;
+                    }
+                }
             }
             if (row[20]) { 
                 var vArr = row[20].split(',');
