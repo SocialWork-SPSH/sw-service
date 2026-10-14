@@ -551,8 +551,8 @@
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติมูลปัญหาทางสังคม</h3><div class="relative h-80"><canvas id="chartProblems"></canvas></div></div>
-                  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติการให้บริการ</h3><div class="relative h-80"><canvas id="chartInterventions"></canvas></div></div>
+                  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติมูลปัญหาทางสังคม</h3><div class="relative h-80"><canvas id="chartProblems"></canvas></div><div id="legendProblems" class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-600 space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar"></div></div>
+                  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติการให้บริการ</h3><div class="relative h-80"><canvas id="chartInterventions"></canvas></div><div id="legendInterventions" class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-600 space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar"></div></div>
               </div>
 
               <div id="pendingCasesContainer" class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6 hidden">
@@ -1397,9 +1397,39 @@
 "219 การฟื้นฟูทักษะชีวิต รายบุคคล", "220 การเพิ่มทักษะชีวิตในการดูแลสุขภาพ", "221 ฝึกทักษะการแก้ไขปัญหา รายบุคคล", "222 ฝึกทักษะการดำรงชีวิต เช่น การอาบน้ำ การแต่งกาย การรับประทานอาหาร รายบุคคล", "223 ฝึกทักษะพื้นฐานในการประกอบอาชีพ รายบุคคล (pre-vocational training, individual)", "224 ฝึกทักษะพื้นฐานในการประกอบอาชีพ แบบกลุ่ม (pre-vocational training, group)", "225 ฝึกทดลองงานทั้งในสถานพยาบาลและสถานประกอบการ", "226 การให้การปรึกษาแนะนำในระหว่างประกอบอาชีพ (job coach)", "227 ทักษะพื้นฐานการทำงานและส่งเสริมการประกอบอาชีพ อิสระ (ฝึกอาชีพ)", "228 ส่งต่อเครือข่ายทางสังคมให้มีส่วนร่วมในการฟื้นฟูฯ"] },
         "3": { name: "3. การคุ้มครองสิทธิ์ทางสังคม และการจัดการทรัพยากรทางสังคม (Social Resources Management)", sub: ["311 พิจารณาค่ารักษาพยาบาล", "312 ค่าพาหนะเดินทางกลับบ้าน/มารับบริการ", 
 "313 ค่าครองชีพชั่วคราว", "314 เครื่องอุปโภค/บริโภค", "315 สงเคราะห์ครอบครัว", "316 จัดหา/สงเคราะห์เงินซื้อกายอุปกรณ์และเครื่องช่วยความพิการ", "317 จัดหา/สงเคราะห์เงินซื้ออุปกรณ์ทางการแพทย์/วัสดุการแพทย์", "318 สงเคราะห์เงินทุนประกอบอาชีพ", "319 จัดหาเบี้ยยังชีพ", "320 จัดหา/สงเคราะห์ทุนการศึกษา", "321 จัดหาที่อยู่อาศัยชั่วคราว / ถาวร", "322 จัดหาสถานที่ดูแล/คนดูแล(หลังจำหน่ายออกโรงพยาบาลแล้ว)", "323 การจัดสิ่งแวดล้อมเพื่อการบำบัด รายบุคคล", "324 ประสาน/ส่งต่อศูนย์สุขภาพชุมชนและอาสาสมัครดูแล กันเองในชุมชน", "325 การส่งต่อหน่วยงานอื่น/ประสานงานเครือข่ายด้าน สวัสดิการสังคม"] },
-        "4": { name: "4. จัดบริการทางสังคม", sub: ["411 การประเมินครอบครัว", "412 เตรียมครอบครัวเพื่อฟื้นฟูสมรรถภาพในครอบครัว/ชุมชน", "413 ประเมินความเสี่ยง/เฝ้าระวังปัญหาทางสังคม (Social Surveillance)", "414 การพิทักษ์สิทธิในการรักษาพยาบาล", "415 การเยี่ยมบ้านร่วมกับทีมสหวิชาชีพ", 
+        "4": { name: "4. จัดบริการทางสังคม", sub: ["411 การประเมินครอบครัว", "412 เตรียมครอบครัวเพื่อฟื้นฟูสมรรถภาพในครอบครัว/ชุมชน", "413 ประเมินความเสี่ยง/เฝ้าระวังปัญหาทางสังคม (Social Surveillance)", "414 การพิทักษ์สิทธิในการรักษาพยาบาล", "415 การเยี่ยมบ้านร่วมกับทีมสหวิชาชีพ",
 "416 การเยี่ยมบ้าน", "417 การคุ้มครองและพิทักษ์สิทธิ์ตามกฎหมาย (Rights Protection and Advocacy)", "418 การจัดการรายกรณี (case management)", "419 การประเมินทางสังคม/จดทะเบียนผู้พิการ", "420 การติดต่อ /ติดตามญาติ", "421 การประเมินทางสังคมอื่น ๆ"] }
     };
+
+    // สร้างตาราง รหัส -> คำอธิบาย แบบแบนราบ (flat map) จาก socialProblemsList / interventionsList
+    // ใช้แสดงคำอธิบายใต้กราฟใน Dashboard (เหมือนกับที่ dashboard-public.html ใช้)
+    function buildCodeMap(dict) {
+        var map = {};
+        Object.keys(dict).forEach(function (catKey) {
+            (dict[catKey].sub || []).forEach(function (entry) {
+                var sp = entry.indexOf(' ');
+                var code = sp === -1 ? entry : entry.substring(0, sp);
+                var desc = sp === -1 ? entry : entry.substring(sp + 1);
+                map[code] = desc;
+            });
+        });
+        return map;
+    }
+    var PROBLEM_CODE_MAP = buildCodeMap(socialProblemsList);
+    var INTERVENTION_CODE_MAP = buildCodeMap(interventionsList);
+
+    function renderCodeLegend(elId, sortedPairs, codeMap) {
+        var el = document.getElementById(elId);
+        if (!el) return;
+        if (!sortedPairs || sortedPairs.length === 0) { el.innerHTML = ''; return; }
+        el.innerHTML = sortedPairs.map(function (pair) {
+            var rawCode = String(pair[0]).trim();
+            var code = rawCode.replace(/,$/, '').replace(/^['’]+/, '');
+            var desc = codeMap[code] || 'ไม่มีคำอธิบาย';
+            return '<div class="flex gap-2"><span class="shrink-0 font-bold text-[#3d82af] bg-blue-50 px-1.5 rounded">' + rawCode + '</span>' +
+                   '<span class="flex-1">' + desc + ' <span class="text-gray-400">(' + pair[1] + ' ครั้ง)</span></span></div>';
+        }).join('');
+    }
 
     function generateAccordion(dict, containerId, inputName, themeClass, bgClass) {
       var container = document.getElementById(containerId);
@@ -2183,9 +2213,11 @@
 
         var pSorted = Object.keys(probs).map(function(k){return [k, probs[k]];}).sort(function(a,b){return a[0].localeCompare(b[0]);});
         drawChart('chartProblems', 'bar', pSorted.map(function(x){return x[0];}), pSorted.map(function(x){return x[1];}), '#2c6385', { plugins: { legend: { display: false } } });
+        renderCodeLegend('legendProblems', pSorted, PROBLEM_CODE_MAP);
 
         var iSorted = Object.keys(intvs).map(function(k){return [k, intvs[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 8);
         drawChart('chartInterventions', 'bar', iSorted.map(function(x){return x[0].substring(0,25)+'...';}), iSorted.map(function(x){return x[1];}), '#ff3f3e', { indexAxis: 'y', plugins: { legend: { display: false } } });
+        renderCodeLegend('legendInterventions', iSorted, INTERVENTION_CODE_MAP);
 
         drawChart('chartFinanceType', 'pie', Object.keys(finTypes), Object.keys(finTypes).map(function(k){return finTypes[k];}), ['#10b981', '#ef4444', '#f59e0b'], { plugins: { legend: { position: 'bottom' } } });
         var fwSorted = Object.keys(finWards).map(function(k){return [k, finWards[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
