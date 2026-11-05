@@ -231,6 +231,14 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="bg-red-50 px-5 py-3 border-l-4 border-red-500"><h2 class="font-bold text-red-700">5. บันทึกบริการสงเคราะห์ (การเงิน)</h2></div>
               <div class="p-5">
+                <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="lookupAssist()" class="bg-blue-700 text-white text-sm font-bold px-3 py-2 rounded-lg">🔗 ดึงผลอนุมัติจากระบบเสนออนุมัติ (ตาม HN)</button>
+                    <span class="text-xs text-gray-600">อนุเคราะห์/ค้างชำระต้องผ่านการอนุมัติตามวงเงินก่อน ระบบจะใช้ยอดที่อนุมัติจริง</span>
+                  </div>
+                  <div id="assistResult" class="mt-2 text-sm"></div>
+                  <input type="hidden" name="assistCaseId" id="assistCaseId">
+                </div>
                 <div class="mb-4">
                   <label class="block text-sm font-bold text-gray-700 mb-1">ประเภทบริการ (หากไม่มีให้ข้าม)</label>
                   <select name="financeType" id="financeTypeSelect" class="input-field max-w-md" onchange="toggleFinanceDetails()">
@@ -532,6 +540,7 @@
           </div>
 
           <div id="dash-tab-overview" class="block">
+              <div id="dashSourceNote" class="hidden mb-4 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"></div>
               <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm col-span-2 md:col-span-1"><p class="text-[11px] font-bold text-blue-600 uppercase tracking-wide">ผู้ใช้บริการทั้งหมด</p><div class="flex items-baseline mt-1"><h3 class="text-3xl font-black text-blue-800" id="kpiTotal">0</h3><span class="text-xs text-blue-500 ml-1">ครั้ง</span></div></div>
                 <div class="bg-white p-4 rounded-xl border-b-4 border-[#3d82af] shadow-sm"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">ในเขต อ.ดำเนินสะดวก</p><h3 class="text-2xl font-black text-gray-800 mt-1" id="kpiLocIn">0</h3></div>
@@ -550,7 +559,7 @@
                   <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">กลุ่มเป้าหมาย</h3><div class="relative h-64"><canvas id="chartTargetGroup"></canvas></div></div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div id="dashDetailRow" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติมูลปัญหาทางสังคม</h3><div class="relative h-80"><canvas id="chartProblems"></canvas></div><div id="legendProblems" class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-600 space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar"></div></div>
                   <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-gray-700 mb-4 border-l-4 border-[#3d82af] pl-2">สถิติการให้บริการ</h3><div class="relative h-80"><canvas id="chartInterventions"></canvas></div><div id="legendInterventions" class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-600 space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar"></div></div>
               </div>
@@ -1282,6 +1291,39 @@
         }
     }
 
+    // ---- เชื่อมระบบเสนออนุมัติ (sw-assist) ----
+    var __assistCases = [];
+    function lookupAssist() {
+        var f = document.getElementById('socialForm');
+        var hn = (f.elements['hn'].value || '').trim();
+        var box = document.getElementById('assistResult');
+        if (!hn) { box.textContent = 'กรอก HN ก่อน'; return; }
+        box.textContent = 'กำลังดึงข้อมูล…';
+        gasApiGet('getAssistCases', { hn: hn }).then(function(res) {
+            if (res.configured === false) { box.textContent = 'ยังไม่ได้เชื่อมระบบเสนออนุมัติ (ผู้ดูแลตั้งค่า ASSIST_API_URL และ INTEGRATION_KEY)'; return; }
+            __assistCases = (res.cases || []).filter(function(c) { return c.status === 'approved'; });
+            var wait = (res.cases || []).length - __assistCases.length;
+            if (!__assistCases.length) { box.textContent = 'ไม่พบรายการที่อนุมัติแล้วของ HN นี้' + (wait ? ' (มี ' + wait + ' รายการยังรอพิจารณา/รอความเห็นแพทย์)' : ''); return; }
+            box.innerHTML = __assistCases.map(function(c, i) {
+                return '<div class="py-1 border-t border-blue-100"><b>' + c.type + '</b> อนุมัติ ' + Number(c.approvedAmount).toLocaleString('th-TH') + ' บาท · ' +
+                  (c.decidedAt ? new Date(c.decidedAt).toLocaleDateString('th-TH') : '') + (c.an ? ' · AN ' + c.an : '') + (c.financeAck ? ' · การเงินบันทึกแล้ว' : '') + (c.vulnerable && c.vulnerable.length ? ' · <span class="text-purple-700 font-bold">ความเปราะบาง: ' + c.vulnerable.join(', ') + '</span>' : '') +
+                  ' <button type="button" class="ml-2 text-xs bg-white border border-blue-400 text-blue-700 px-2 py-1 rounded" onclick="applyAssist(' + i + ')">ใช้รายการนี้</button></div>';
+            }).join('');
+        }).catch(function(e) { box.textContent = e.message; });
+    }
+    function applyAssist(i) {
+        var c = __assistCases[i]; if (!c) return;
+        var f = document.getElementById('socialForm'), E = f.elements;
+        var debt = Number(c.level) === 1;
+        E['financeType'].value = debt ? 'ค้างชำระ' : 'อนุเคราะห์';
+        toggleFinanceDetails();
+        if (c.an && E['an'] && !E['an'].value) E['an'].value = c.an;
+        E['totalCost'].value = c.cost || ''; E['copay'].value = c.payNow || '';
+        if (debt) { E['balance'].value = c.approvedAmount; E['assistAmount'].value = ''; } else { E['assistAmount'].value = c.approvedAmount; E['balance'].value = ''; }
+        if (c.covered) E['otherRights'].value = 'สิทธิ/กองทุนจ่าย ' + c.covered + ' บาท';
+        document.getElementById('assistCaseId').value = c.id;
+        document.getElementById('assistResult').innerHTML = '<span class="text-green-700 font-bold">นำยอดอนุมัติเข้าฟอร์มแล้ว (อ้างอิง ' + String(c.id).slice(0, 6).toUpperCase() + ') ยอดแก้เองไม่ได้ ระบบใช้ยอดที่อนุมัติ' + (c.vulnerable && c.vulnerable.length ? ' · จะบันทึกความเปราะบางจากระบบเสนออนุมัติเข้าทะเบียนด้วย' : '') + '</span>';
+    }
     function toggleFinanceDetails() {
         var sel = document.getElementById('financeTypeSelect');
         var box = document.getElementById('financeFieldsContainer');
@@ -1418,17 +1460,41 @@
     var PROBLEM_CODE_MAP = buildCodeMap(socialProblemsList);
     var INTERVENTION_CODE_MAP = buildCodeMap(interventionsList);
 
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function cleanCode(raw) { return String(raw).trim().replace(/,$/, '').replace(/^['\u2019]+/, ''); }
+
+    // ป้ายชื่อบนแกนกราฟ: รหัส (ตัวเลข) แสดงตามเดิม / ชื่อบริการ (ปีงบ 2569) ใส่ลำดับนำหน้าและตัดให้สั้น
+    function chartLabel(key, idx, maxLen) {
+        var k = String(key);
+        if (/^\d+$/.test(cleanCode(k))) return k;
+        return (idx + 1) + '. ' + (k.length > maxLen ? k.substring(0, maxLen) + '…' : k);
+    }
+
+    // แสดงคำอธิบายใต้กราฟ: รหัส → คำอธิบายเต็ม / ชื่อบริการ → ลำดับตรงกับแท่งกราฟ + ชื่อเต็ม
     function renderCodeLegend(elId, sortedPairs, codeMap) {
         var el = document.getElementById(elId);
         if (!el) return;
         if (!sortedPairs || sortedPairs.length === 0) { el.innerHTML = ''; return; }
-        el.innerHTML = sortedPairs.map(function (pair) {
+        el.innerHTML = sortedPairs.map(function (pair, idx) {
             var rawCode = String(pair[0]).trim();
-            var code = rawCode.replace(/,$/, '').replace(/^['’]+/, '');
+            var code = cleanCode(rawCode);
+            if (!/^\d+$/.test(code)) {
+                return '<div class="flex gap-2"><span class="shrink-0 font-bold text-[#ff3f3e] bg-red-50 px-1.5 rounded">' + (idx + 1) + '</span>' +
+                       '<span class="flex-1">' + escapeHtml(rawCode) + ' <span class="text-gray-400">(' + pair[1] + ' ครั้ง)</span></span></div>';
+            }
             var desc = codeMap[code] || 'ไม่มีคำอธิบาย';
-            return '<div class="flex gap-2"><span class="shrink-0 font-bold text-[#3d82af] bg-blue-50 px-1.5 rounded">' + rawCode + '</span>' +
-                   '<span class="flex-1">' + desc + ' <span class="text-gray-400">(' + pair[1] + ' ครั้ง)</span></span></div>';
+            return '<div class="flex gap-2"><span class="shrink-0 font-bold text-[#3d82af] bg-blue-50 px-1.5 rounded">' + escapeHtml(rawCode) + '</span>' +
+                   '<span class="flex-1">' + escapeHtml(desc) + ' <span class="text-gray-400">(' + pair[1] + ' ครั้ง)</span></span></div>';
         }).join('');
+    }
+
+    // ดึงรหัสปัญหาสังคม 4 หลักจากข้อความในช่อง (รองรับ "0401", "'0401", "0401, 0403" และ "1405 คำอธิบาย..., 1406 ...")
+    function extractProblemCodes(cell) {
+        var out = [], re = /(?:^|,)\s*['\u2019]?(\d{4})(?=\s|,|$)/g, s = String(cell == null ? '' : cell), mt;
+        while ((mt = re.exec(s)) !== null) out.push(mt[1]);
+        return out;
     }
 
     function generateAccordion(dict, containerId, inputName, themeClass, bgClass) {
@@ -1470,6 +1536,21 @@
       }
     }
 
+    // เติม dropdown ปีงบของ Dashboard จากปีที่มีข้อมูลจริง (ถ้าดึงไม่ได้ จะใช้รายการที่สร้างจากวันที่ปัจจุบันไว้ก่อนเหมือนเดิม)
+    function loadDashboardFiscalYears() {
+        gasApiGet('getFiscalYears').then(function(res) {
+            var el = document.getElementById('dashSearchFY');
+            if (!el || !res || !res.years || !res.years.length) return;
+            var keep = el.value;
+            el.innerHTML = '<option value="">-- ทุกปีงบประมาณ --</option>';
+            res.years.forEach(function(y) {
+                var opt = document.createElement('option');
+                opt.value = y; opt.innerHTML = 'ปีงบฯ ' + y; el.appendChild(opt);
+            });
+            el.value = keep;
+        }).catch(function() {});
+    }
+
     function generateFiscalYearOptions() {
         var currentYear = new Date().getFullYear();
         var currentMonth = new Date().getMonth() + 1;
@@ -1487,6 +1568,7 @@
                 }
             }
         }
+        loadDashboardFiscalYears();
     }
 
     // ==========================================
@@ -1594,6 +1676,7 @@
       data.serviceProvided = fd.getAll('serviceProvided'); 
       data.serviceProvidedUpdate = fd.getAll('serviceProvidedUpdate');
       data.finType = fd.getAll('finType'); 
+      data.assistCaseId = (document.getElementById('assistCaseId')||{}).value || '';
 
       gasApiPost(actionName, data).then(function(res) {
           btn.disabled = false; btn.innerHTML = txt;
@@ -2100,11 +2183,76 @@
         chartsObj[id] = new Chart(ctx, config);
     }
 
+    // วาด Dashboard จากตัวเลขสรุป s (รูปแบบเดียวกับที่ getPublicDashboardSummary ส่งกลับ)
+    function renderDashboardSummary(s) {
+        var statusOk = s.statusAvailable !== false;
+        var detail = s.detail || { available: true, note: '' };
+
+        document.getElementById('kpiTotal').innerText = s.total; document.getElementById('kpiLocIn').innerText = s.locIn;
+        document.getElementById('kpiClosed').innerText = statusOk ? s.closed : '–';
+        document.getElementById('kpiTracking').innerText = statusOk ? s.tracking : '–';
+        document.getElementById('kpiActive').innerText = statusOk ? s.active : '–';
+
+        var noteEl = document.getElementById('dashSourceNote');
+        var notes = s.notes || [];
+        noteEl.innerHTML = notes.map(escapeHtml).join('<br>');
+        noteEl.classList.toggle('hidden', notes.length === 0);
+
+        function fmt(num) { return (num || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        document.getElementById('dashTotalCost').innerText = fmt(s.tc) + ' ฿'; document.getElementById('dashSelfPay').innerText = fmt(s.sp) + ' ฿';
+        document.getElementById('dashWelfare').innerText = fmt(s.wf) + ' ฿'; document.getElementById('dashDebt').innerText = fmt(s.db) + ' ฿';
+
+        drawChart('chartNationality', 'pie', Object.keys(s.nats), Object.keys(s.nats).map(function(k){return s.nats[k];}), ['#ffa500', '#ff3f3e', '#3d82af', '#2c6385'], { plugins: { legend: { position: 'bottom' } } });
+        drawChart('chartArea', 'bar', Object.keys(s.areas), Object.keys(s.areas).map(function(k){return s.areas[k];}), ['#10b981', '#f59e0b', '#ef4444'], { plugins: { legend: { display: false } } });
+        drawChart('chartPatientType', 'pie', Object.keys(s.pTypes), Object.keys(s.pTypes).map(function(k){return s.pTypes[k];}), ['#3d82af', '#2c6385', '#ff3f3e', '#ffa500', '#94a3b8'], { plugins: { legend: { position: 'right' } } });
+
+        var tgSorted = Object.keys(s.targets).map(function(k){return [k, s.targets[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
+        drawChart('chartTargetGroup', 'bar', tgSorted.map(function(x){return x[0].substring(0,15)+'...';}), tgSorted.map(function(x){return x[1];}), '#3d82af', { indexAxis: 'y', plugins: { legend: { display: false } } });
+
+        // ปัญหาทางสังคม/การให้บริการ: ปีงบก่อน 2569 ไม่มีข้อมูลบันทึกรายละเอียด → ซ่อนทั้งแถว (มีข้อความอธิบายด้านบนแล้ว)
+        document.getElementById('dashDetailRow').classList.toggle('hidden', !detail.available);
+        if (detail.available) {
+            var pSorted = Object.keys(s.probs).map(function(k){return [k, s.probs[k]];}).sort(function(a,b){return a[0].localeCompare(b[0]);});
+            drawChart('chartProblems', 'bar', pSorted.map(function(x){return x[0];}), pSorted.map(function(x){return x[1];}), '#2c6385', { plugins: { legend: { display: false } } });
+            renderCodeLegend('legendProblems', pSorted, PROBLEM_CODE_MAP);
+
+            var iSorted = Object.keys(s.intvs).map(function(k){return [k, s.intvs[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 10);
+            drawChart('chartInterventions', 'bar', iSorted.map(function(x, i){return chartLabel(x[0], i, 28);}), iSorted.map(function(x){return x[1];}), '#ff3f3e', { indexAxis: 'y', plugins: { legend: { display: false } } });
+            renderCodeLegend('legendInterventions', iSorted, INTERVENTION_CODE_MAP);
+        }
+
+        drawChart('chartFinanceType', 'pie', Object.keys(s.finTypes), Object.keys(s.finTypes).map(function(k){return s.finTypes[k];}), ['#10b981', '#ef4444', '#f59e0b'], { plugins: { legend: { position: 'bottom' } } });
+        var fwSorted = Object.keys(s.finWards).map(function(k){return [k, s.finWards[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
+        drawChart('chartFinanceWard', 'bar', fwSorted.map(function(x){return x[0];}), fwSorted.map(function(x){return x[1];}), '#f59e0b', { plugins: { legend: { display: false } } });
+
+        function renderTbl(id, obj) {
+           var tbody = document.getElementById(id); tbody.innerHTML = '';
+           var sorted = Object.keys(obj).map(function(k){return [k, obj[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 10);
+           for(var i=0; i<sorted.length; i++) {
+               tbody.innerHTML += '<tr><td class="py-2 pr-2 border-b border-gray-100">' + sorted[i][0] + '</td><td class="py-2 pl-2 border-b border-gray-100 font-bold text-right w-1/4">' + sorted[i][1] + '</td></tr>';
+           }
+        }
+        renderTbl('finTableAddress', s.finAddr); renderTbl('finTableTarget', s.finTarget);
+        renderTbl('finTableNation', s.finNat); renderTbl('finTableICD', s.finIcd);
+    }
+
     function loadDashboard() {
       var fyFilter = document.getElementById('dashSearchFY').value;
       var moFilter = document.getElementById('dashSearchMonth').value;
       var wkFilter = document.getElementById('dashSearchWorker').value.trim();
 
+      // มุมมองปกติ: ให้เซิร์ฟเวอร์สรุปให้ (ปีงบ 2569 ขึ้นไปดึงจากชีตสถิติการให้บริการ 69, ก่อนหน้านั้นใช้ชีตเดิม)
+      if (!wkFilter) {
+        gasApiGet('getPublicDashboardSummary', { fy: fyFilter, mo: moFilter }).then(function(s) {
+          renderDashboardSummary(s);
+          document.getElementById('pendingCasesContainer').classList.add('hidden');
+        }).catch(function(err) {
+          Swal.fire('Error', err.toString(), 'error');
+        });
+        return;
+      }
+
+      // กรองตามนักสังคมสงเคราะห์: ชีตปีงบ 2569 ไม่มีข้อมูลผู้ให้บริการ จึงใช้ข้อมูลที่บันทึกในระบบนี้เท่านั้น (เหมือนเดิม)
       gasApiGet('getDashboardData').then(function(rawData) {
         var data = [];
         for(var i=0; i<rawData.length; i++) {
@@ -2173,13 +2321,7 @@
             }
 
             for (var i = 30; i <= 46; i++) {
-                if (row[i] && String(row[i]).trim() !== "") {
-                    var pArr = String(row[i]).split(',');
-                    for (var pa = 0; pa < pArr.length; pa++) {
-                        var pKey = pArr[pa].trim().replace(/^['’]+\s*/, '').split(' ')[0].trim();
-                        if (pKey) probs[pKey] = (probs[pKey] || 0) + 1;
-                    }
-                }
+                extractProblemCodes(row[i]).forEach(function(cd) { probs[cd] = (probs[cd] || 0) + 1; });
             }
             if (row[20]) {
                 var vArr = row[20].split(',');
@@ -2197,41 +2339,14 @@
             }
         }
 
-        document.getElementById('kpiTotal').innerText = total; document.getElementById('kpiLocIn').innerText = locIn;
-        document.getElementById('kpiClosed').innerText = closed; document.getElementById('kpiTracking').innerText = tracking; document.getElementById('kpiActive').innerText = active;
-
-        function fmt(num) { return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-        document.getElementById('dashTotalCost').innerText = fmt(tc) + ' ฿'; document.getElementById('dashSelfPay').innerText = fmt(sp) + ' ฿';
-        document.getElementById('dashWelfare').innerText = fmt(wf) + ' ฿'; document.getElementById('dashDebt').innerText = fmt(db) + ' ฿';
-
-        drawChart('chartNationality', 'pie', Object.keys(nats), Object.keys(nats).map(function(k){return nats[k];}), ['#ffa500', '#ff3f3e', '#3d82af', '#2c6385'], { plugins: { legend: { position: 'bottom' } } });
-        drawChart('chartArea', 'bar', Object.keys(areas), Object.keys(areas).map(function(k){return areas[k];}), ['#10b981', '#f59e0b', '#ef4444'], { plugins: { legend: { display: false } } });
-        drawChart('chartPatientType', 'pie', Object.keys(pTypes), Object.keys(pTypes).map(function(k){return pTypes[k];}), ['#3d82af', '#2c6385', '#ff3f3e', '#ffa500', '#94a3b8'], { plugins: { legend: { position: 'right' } } });
-        
-        var tgSorted = Object.keys(targets).map(function(k){return [k, targets[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
-        drawChart('chartTargetGroup', 'bar', tgSorted.map(function(x){return x[0].substring(0,15)+'...';}), tgSorted.map(function(x){return x[1];}), '#3d82af', { indexAxis: 'y', plugins: { legend: { display: false } } });
-
-        var pSorted = Object.keys(probs).map(function(k){return [k, probs[k]];}).sort(function(a,b){return a[0].localeCompare(b[0]);});
-        drawChart('chartProblems', 'bar', pSorted.map(function(x){return x[0];}), pSorted.map(function(x){return x[1];}), '#2c6385', { plugins: { legend: { display: false } } });
-        renderCodeLegend('legendProblems', pSorted, PROBLEM_CODE_MAP);
-
-        var iSorted = Object.keys(intvs).map(function(k){return [k, intvs[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 8);
-        drawChart('chartInterventions', 'bar', iSorted.map(function(x){return x[0].substring(0,25)+'...';}), iSorted.map(function(x){return x[1];}), '#ff3f3e', { indexAxis: 'y', plugins: { legend: { display: false } } });
-        renderCodeLegend('legendInterventions', iSorted, INTERVENTION_CODE_MAP);
-
-        drawChart('chartFinanceType', 'pie', Object.keys(finTypes), Object.keys(finTypes).map(function(k){return finTypes[k];}), ['#10b981', '#ef4444', '#f59e0b'], { plugins: { legend: { position: 'bottom' } } });
-        var fwSorted = Object.keys(finWards).map(function(k){return [k, finWards[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 5);
-        drawChart('chartFinanceWard', 'bar', fwSorted.map(function(x){return x[0];}), fwSorted.map(function(x){return x[1];}), '#f59e0b', { plugins: { legend: { display: false } } });
-
-        function renderTbl(id, obj) {
-           var tbody = document.getElementById(id); tbody.innerHTML = '';
-           var sorted = Object.keys(obj).map(function(k){return [k, obj[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0, 10);
-           for(var i=0; i<sorted.length; i++) {
-               tbody.innerHTML += '<tr><td class="py-2 pr-2 border-b border-gray-100">' + sorted[i][0] + '</td><td class="py-2 pl-2 border-b border-gray-100 font-bold text-right w-1/4">' + sorted[i][1] + '</td></tr>';
-           }
-        }
-        renderTbl('finTableAddress', finAddr); renderTbl('finTableTarget', finTarget);
-        renderTbl('finTableNation', finNat); renderTbl('finTableICD', finIcd);
+        renderDashboardSummary({
+            total: total, locIn: locIn, closed: closed, tracking: tracking, active: active,
+            areas: areas, pTypes: pTypes, targets: targets, nats: nats, probs: probs, intvs: intvs,
+            tc: tc, sp: sp, wf: wf, db: db,
+            finTypes: finTypes, finWards: finWards, finAddr: finAddr, finTarget: finTarget, finNat: finNat, finIcd: finIcd,
+            statusAvailable: true, detail: { available: true, note: '' },
+            notes: ['กำลังกรองตามนักสังคมสงเคราะห์: แสดงเฉพาะข้อมูลที่บันทึกในระบบนี้ (ไม่รวมข้อมูลจากชีตสถิติการให้บริการ ปีงบประมาณ 2569 ซึ่งไม่มีชื่อผู้ให้บริการ)']
+        });
 
         var pendingContainer = document.getElementById('pendingCasesContainer'); 
         var pendingBody = document.getElementById('pendingCasesTableBody');
