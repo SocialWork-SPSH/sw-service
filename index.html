@@ -2105,6 +2105,7 @@
         // หากลุ่ม Record_ID เพื่อหาค่าล่าสุด
         var latestObj = {};
         var uniqueData = [];
+        var conflictIds = findConflictingRecordIds(allPatientData);
         for(var i=0; i<allPatientData.length; i++) {
             var item = allPatientData[i];
             if(!latestObj[item.recordId]) {
@@ -2148,7 +2149,8 @@
           var btn = '<button type="button" data-rid="' + escapeHtml(item.recordId) + '" onclick="openFollowUpModal(this.getAttribute(\'data-rid\'))" class="bg-[#3d82af] text-white px-4 py-2 min-h-11 rounded-lg shadow-sm text-xs font-bold hover:bg-[#2c6385]">อัปเดต</button>';
           
           rowsHtml += '<tr class="border-b border-gray-100 hover:bg-gray-50">' +
-            '<td class="p-3 font-bold text-gray-600">' + escapeHtml(item.recordId) + '</td>' +
+            '<td class="p-3 font-bold text-gray-600">' + escapeHtml(item.recordId) +
+              (conflictIds[item.recordId] ? '<span class="block mt-1 w-fit px-2 py-0.5 rounded bg-red-100 text-red-800 text-xs font-bold" title="Record_ID นี้ถูกใช้กับผู้ป่วยมากกว่า 1 คน (ข้อมูลเก่า) — ผู้ดูแลระบบควรรัน auditRecordIds / repairRecordIds">Record_ID ซ้ำ — แจ้งผู้ดูแลระบบ</span>' : '') + '</td>' +
             '<td class="p-3">' + escapeHtml(item.date) + '</td>' +
             '<td class="p-3 font-bold">' + escapeHtml(item.hn) + '</td>' +
             '<td class="p-3 text-[#3d82af] font-bold">' + escapeHtml(item.name) + '</td>' +
@@ -2178,12 +2180,25 @@
     // รวมข้อมูลของเคส (Record_ID เดียวกัน) ทุกแถว: แต่ละช่องใช้ "ค่าล่าสุดที่ไม่ว่าง"
     // แก้ปัญหาแถวการติดตามเก่าที่บันทึก AN/หมู่/ข้อมูลบางช่องเป็นค่าว่าง ทำให้ฟอร์มติดตามครั้งถัดไปดึงข้อมูลมาไม่ครบ
     var CASE_FIELDS = ['hn', 'an', 'name', 'ward', 'target', 'insurance', 'dob', 'icd10', 'zCat', 'prov', 'dist', 'subDist', 'moo', 'nationality', 'patientType', 'age', 'idcard'];
+    function normHnUi(v) { return String(v == null ? '' : v).replace(/^'/, '').replace(/\s+/g, '').toLowerCase(); }
+    // Record_ID ที่ถูกใช้กับผู้ป่วยมากกว่า 1 HN (ข้อมูลเก่าที่ได้เลขซ้ำ) — ใช้แสดงป้ายเตือนในตารางติดตาม
+    function findConflictingRecordIds(rows) {
+        var seen = {}, conflict = {};
+        for (var i = 0; i < rows.length; i++) {
+            var id = rows[i].recordId, hn = normHnUi(rows[i].hn);
+            if (!id || !hn) continue;
+            if (seen[id] === undefined) seen[id] = hn; else if (seen[id] !== hn) conflict[id] = true;
+        }
+        return conflict;
+    }
     function getMergedCase(recordId) {
         var merged = null;
         for (var i = 0; i < allPatientData.length; i++) {   // allPatientData เรียงจากล่าสุด → เก่าสุด
             var r = allPatientData[i];
             if (r.recordId !== recordId) continue;
             if (!merged) { merged = {}; for (var k in r) merged[k] = r[k]; continue; }
+            // กัน Record_ID ซ้ำจากระบบรันเลขแบบเดิม: รวมเฉพาะแถวที่เป็น HN เดียวกับแถวล่าสุด ไม่ดึงข้อมูลผู้ป่วยคนอื่นมาปน
+            if (normHnUi(r.hn) && normHnUi(merged.hn) && normHnUi(r.hn) !== normHnUi(merged.hn)) continue;
             CASE_FIELDS.forEach(function(f) {
                 var cur = merged[f];
                 if ((cur === undefined || cur === null || String(cur).trim() === '') && r[f] !== undefined && String(r[f]).trim() !== '') merged[f] = r[f];
