@@ -33,9 +33,37 @@
        ส่วนช่องที่ผู้ใช้เห็นและคลิกเลือกวันที่ คือ altInput ที่ Flatpickr สร้างขึ้นใหม่ */
     .flatpickr-current-month input.cur-year { font-size: inherit; }
     .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
+
+    /* ไอคอน SVG ชุดเดียวทั้งระบบ (แทนอีโมจิ ซึ่งแสดงผลต่างกันในแต่ละเครื่อง/เบราว์เซอร์ และอ่านออกเสียงโดยโปรแกรมอ่านหน้าจอ) */
+    .ic { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -0.2em; flex-shrink: 0;
+          fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ic-gap { margin-right: 0.4em; }
+
+    /* วงโฟกัสที่เห็นชัดเมื่อใช้คีย์บอร์ด (Tab) — ไม่แสดงเมื่อคลิกด้วยเมาส์ */
+    a:focus-visible, button:focus-visible, [role="button"]:focus-visible, summary:focus-visible,
+    input[type="checkbox"]:focus-visible, input[type="radio"]:focus-visible, select:focus-visible {
+      outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 0.5rem;
+    }
+    #sidebar a:focus-visible, #sidebar button:focus-visible, #sidebar [role="button"]:focus-visible { outline-color: #ffffff; }
+    label:has(> input.sr-only:focus-visible) { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 0.5rem; }
+
+    /* โครงร่างขณะโหลด (skeleton) — บอกผู้ใช้ว่ากำลังโหลดและตารางจะมีหน้าตาอย่างไร โดยหน้าไม่กระโดด */
+    .sk { display: block; height: 0.9rem; border-radius: 0.375rem;
+          background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%;
+          animation: skShine 1.2s ease-in-out infinite; }
+    @keyframes skShine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* ผู้ใช้ที่ตั้งค่า "ลดการเคลื่อนไหว" ในระบบปฏิบัติการ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+                               transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+      .page-section.active { animation: none; }
+      .sk, .animate-pulse { animation: none !important; }
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden bg-slate-50">
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol><symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 21v-8h6v8"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol><symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-money" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol><symbol id="i-mappin" viewBox="0 0 24 24"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-steth" viewBox="0 0 24 24"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></symbol><symbol id="i-archive" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol></svg>
 
   <!-- ================= หน้าจอเข้าสู่ระบบ ================= -->
   <div id="loginScreen" class="fixed inset-0 z-[60] flex items-center justify-center bg-gradient-to-br from-[#2c6385] to-[#1a3f55] p-4">
@@ -56,7 +84,7 @@
           <label class="block text-sm font-bold text-gray-700 mb-1">รหัสผ่าน</label>
           <input type="password" id="loginPassword" class="input-field" placeholder="รหัสผ่าน" required autocomplete="current-password">
         </div>
-        <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2"></div>
+        <div id="loginError" role="alert" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2"></div>
         <button type="submit" id="loginBtn" class="w-full bg-theme text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme transition">เข้าสู่ระบบ</button>
       </form>
     </div>
@@ -74,27 +102,27 @@
         </div>
         <span class="font-bold text-lg tracking-wide text-white">Medical Social Work</span>
       </div>
-      <button type="button" aria-label="ปิดเมนู" onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white min-w-11 min-h-11">✖</button>
+      <button type="button" aria-label="ปิดเมนู" onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white min-w-11 min-h-11"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button>
     </div>
     <div class="overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar py-4 px-3 space-y-1 flex flex-col">
       <div class="flex-1">
         <p class="text-xs font-bold text-white/50 uppercase tracking-wider mb-2 px-3 mt-2">เมนูหลัก</p>
-        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group bg-white/20 text-white font-bold" onclick="switchTab('page-register', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">📝</span> บันทึกเคสใหม่</a>
-        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-followup', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">🔄</span> ติดตาม (Follow-up)</a>
-        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-search', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">🔍</span> ค้นหาประวัติ</a>
+        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group bg-white/20 text-white font-bold" onclick="switchTab('page-register', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg></span> บันทึกเคสใหม่</a>
+        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-followup', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg></span> ติดตาม (Follow-up)</a>
+        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-search', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></span> ค้นหาประวัติ</a>
         <p class="text-xs font-bold text-white/50 uppercase tracking-wider mb-2 px-3 mt-6">สถิติและรายงาน</p>
-        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-dashboard', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">📊</span> Dashboard</a>
-        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-export', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">📥</span> ออกรายงาน Excel</a>
+        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-dashboard', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg></span> Dashboard</a>
+        <a role="button" tabindex="0" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-export', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-download"/></svg></span> ออกรายงาน Excel</a>
         <p id="adminMenuLabel" class="text-xs font-bold text-white/50 uppercase tracking-wider mb-2 px-3 mt-6" style="display:none;">ผู้ดูแลระบบ</p>
-        <a id="navUserMgmt" role="button" tabindex="0" style="display:none;" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-users', this)"><span class="text-xl mr-3 group-hover:scale-110 transition">👤</span> จัดการผู้ใช้งาน</a>
+        <a id="navUserMgmt" role="button" tabindex="0" style="display:none;" class="nav-item cursor-pointer flex items-center px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition group" onclick="switchTab('page-users', this)"><span class="text-xl mr-3 group-hover:scale-110 transition"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"/></svg></span> จัดการผู้ใช้งาน</a>
       </div>
       <div class="border-t border-white/10 pt-3 px-1">
         <div class="px-2 py-2">
           <p id="userDisplayName" class="font-bold text-sm text-white truncate">-</p>
           <p id="userRoleBadge" class="text-xs text-white/60">-</p>
         </div>
-        <a role="button" tabindex="0" class="cursor-pointer flex items-center px-3 py-2.5 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition text-sm" onclick="openChangePassword(false)"><span class="text-lg mr-3">🔑</span> เปลี่ยนรหัสผ่าน</a>
-        <a role="button" tabindex="0" class="cursor-pointer flex items-center px-3 py-2.5 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition text-sm" onclick="logout()"><span class="text-lg mr-3">🚪</span> ออกจากระบบ</a>
+        <a role="button" tabindex="0" class="cursor-pointer flex items-center px-3 py-2.5 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition text-sm" onclick="openChangePassword(false)"><span class="text-lg mr-3"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-key"/></svg></span> เปลี่ยนรหัสผ่าน</a>
+        <a role="button" tabindex="0" class="cursor-pointer flex items-center px-3 py-2.5 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition text-sm" onclick="logout()"><span class="text-lg mr-3"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-logout"/></svg></span> ออกจากระบบ</a>
       </div>
     </div>
   </aside>
@@ -105,8 +133,8 @@
   <div class="flex-1 flex flex-col w-full h-screen relative">
     <header class="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-4 z-20 flex-shrink-0">
       <div class="flex items-center">
-        <button type="button" aria-label="เปิดเมนู" onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-800 p-2 rounded-md hover:bg-gray-100 transition mr-2 md:hidden">☰</button>
-        <button type="button" aria-label="ย่อ/ขยายเมนู" onclick="toggleSidebarDesktop()" class="text-gray-500 hover:text-gray-800 p-2 rounded-md hover:bg-gray-100 transition mr-2 hidden md:block">☰</button>
+        <button type="button" aria-label="เปิดเมนู" onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-800 p-2 rounded-md hover:bg-gray-100 transition mr-2 md:hidden"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-menu"/></svg></button>
+        <button type="button" aria-label="ย่อ/ขยายเมนู" onclick="toggleSidebarDesktop()" class="text-gray-500 hover:text-gray-800 p-2 rounded-md hover:bg-gray-100 transition mr-2 hidden md:block"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-menu"/></svg></button>
         <h2 class="text-lg md:text-xl font-bold text-gray-800 hidden sm:block">รพ.สมเด็จพระสังฆราช (อมฺพรมหาเถร)</h2>
       </div>
       <div class="text-sm font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">กลุ่มงานสังคมสงเคราะห์</div>
@@ -117,7 +145,7 @@
 
         <!-- ================= 1. หน้าบันทึกเคสใหม่ ================= -->
         <div id="page-register" class="page-section active">
-          <div class="mb-6 flex items-center"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3">📝 บันทึกข้อมูลการให้บริการ</h1></div>
+          <div class="mb-6 flex items-center"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg>บันทึกข้อมูลการให้บริการ</h1></div>
           <form id="socialForm" onsubmit="handleFormSubmit(event, 'saveRecord')" class="space-y-6">
             
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -201,7 +229,7 @@
                 </div>
 
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p class="text-sm font-bold text-gray-800 mb-3 flex items-center">🏠 ที่อยู่ปัจจุบัน</p>
+                  <p class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-home"/></svg>ที่อยู่ปัจจุบัน</p>
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div><label class="text-xs text-gray-500 mb-1">จังหวัด</label><select id="province" name="province" class="input-field" required><option value="">-- โหลดข้อมูล --</option></select></div>
                     <div><label class="text-xs text-gray-500 mb-1">อำเภอ</label><select id="district" name="district" class="input-field" required><option value="">-- โหลดข้อมูล --</option></select></div>
@@ -212,7 +240,7 @@
                     </div>
                   </div>
                   <div id="addrLoadError" class="hidden mt-3 flex flex-wrap items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
-                    <span>⚠️ โหลดรายชื่อจังหวัด/อำเภอ/ตำบลไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)</span>
+                    <span><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg>โหลดรายชื่อจังหวัด/อำเภอ/ตำบลไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)</span>
                     <button type="button" onclick="retryAddressData()" class="bg-white border border-red-300 text-red-700 font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-red-100">ลองใหม่</button>
                   </div>
                 </div>
@@ -220,14 +248,14 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-[#E3F2FD] px-6 py-4 border-l-8 border-[#3d82af] flex items-center"><span class="text-2xl mr-3">📋</span><h2 class="text-lg font-bold text-[#3d82af]">3. การวินิจฉัยปัญหาทางสังคม (Social Problem List)</h2></div>
+              <div class="bg-[#E3F2FD] px-6 py-4 border-l-8 border-[#3d82af] flex items-center"><span class="text-2xl mr-3"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg></span><h2 class="text-lg font-bold text-[#3d82af]">3. การวินิจฉัยปัญหาทางสังคม (Social Problem List)</h2></div>
               <div class="p-4"><div class="bg-gray-50 p-3 rounded-xl border border-gray-200 h-96 overflow-y-auto custom-scrollbar shadow-inner" id="socialProblemContainer"></div>
               <div class="mt-4"><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียดปัญหาเพิ่มเติม (Note)</label><textarea name="socialDetail" rows="2" class="input-field"></textarea></div>
               </div>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-blue-50 px-6 py-4 border-l-8 border-[#2c6385] flex items-center"><span class="text-2xl mr-3">🛠️</span><h2 class="text-lg font-bold text-[#2c6385]">4. บริการทางสังคม (Intervention)</h2></div>
+              <div class="bg-blue-50 px-6 py-4 border-l-8 border-[#2c6385] flex items-center"><span class="text-2xl mr-3"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-wrench"/></svg></span><h2 class="text-lg font-bold text-[#2c6385]">4. บริการทางสังคม (Intervention)</h2></div>
               <div class="p-4">
                   <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 h-80 overflow-y-auto custom-scrollbar shadow-inner" id="interventionContainer"></div>
               </div>
@@ -238,7 +266,7 @@
               <div class="p-5">
                 <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <button type="button" onclick="lookupAssist()" class="bg-blue-700 text-white text-sm font-bold px-3 py-2 rounded-lg">🔗 ดึงผลอนุมัติจากระบบเสนออนุมัติ (ตาม HN)</button>
+                    <button type="button" onclick="lookupAssist()" class="bg-blue-700 text-white text-sm font-bold px-3 py-2 rounded-lg"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-link"/></svg>ดึงผลอนุมัติจากระบบเสนออนุมัติ (ตาม HN)</button>
                     <span class="text-xs text-gray-600">อนุเคราะห์/ค้างชำระต้องผ่านการอนุมัติตามวงเงินก่อน ระบบจะใช้ยอดที่อนุมัติจริง</span>
                   </div>
                   <div id="assistResult" class="mt-2 text-sm"></div>
@@ -276,7 +304,7 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-green-50 px-6 py-4 border-l-8 border-green-500 flex items-center"><span class="text-2xl mr-3">🎯</span><h2 class="text-lg font-bold text-green-700">6. แผนการให้บริการและสถานะ</h2></div>
+              <div class="bg-green-50 px-6 py-4 border-l-8 border-green-500 flex items-center"><span class="text-2xl mr-3"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-target"/></svg></span><h2 class="text-lg font-bold text-green-700">6. แผนการให้บริการและสถานะ</h2></div>
               <div class="p-6 space-y-5">
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">แผนการให้บริการ (Service Plan)</label><textarea name="servicePlan" rows="3" class="input-field"></textarea></div>
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -291,14 +319,14 @@
             </div>
 
             <div class="sticky bottom-0 z-10 -mx-1 px-1 pt-3 pb-3 bg-gradient-to-t from-slate-50 via-slate-50/95 to-slate-50/0">
-              <button type="submit" id="submitBtn" class="w-full bg-theme text-white font-bold py-4 rounded-xl hover-bg-theme shadow-md transition text-lg disabled:opacity-60 disabled:cursor-wait">💾 บันทึกข้อมูลเข้าสู่ระบบ</button>
+              <button type="submit" id="submitBtn" class="w-full bg-theme text-white font-bold py-4 rounded-xl hover-bg-theme shadow-md transition text-lg disabled:opacity-60 disabled:cursor-wait"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>บันทึกข้อมูลเข้าสู่ระบบ</button>
             </div>
           </form>
         </div>
 
         <!-- ================= 2. หน้าติดตามเคส (Follow-up) ================= -->
         <div id="page-followup" class="page-section">
-          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#ff3f3e] pl-3">🔄 ค้นหาเคสเพื่อติดตาม (Follow-up)</h1></div>
+          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#ff3f3e] pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>ค้นหาเคสเพื่อติดตาม (Follow-up)</h1></div>
           
           <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
             <select id="fuSearchFY" class="input-field"><option value="">-- ทุกปีงบประมาณ --</option></select>
@@ -311,12 +339,14 @@
             </select>
             <input type="text" id="fuSearchKeyword" placeholder="พิมพ์ HN หรือ ชื่อผู้ป่วย..." class="input-field md:col-span-3 lg:col-span-1">
             <div class="md:col-span-3 lg:col-span-4 flex justify-end">
-                <button onclick="searchForFollowUp()" class="bg-[#3d82af] text-white px-6 py-2.5 font-bold rounded-lg shadow-sm hover:bg-[#2c6385] transition">ค้นหาเคส</button>
+                <button type="button" onclick="searchForFollowUp()" class="bg-[#3d82af] text-white px-6 py-2.5 font-bold rounded-lg shadow-sm hover:bg-[#2c6385] transition">ค้นหาเคส</button>
             </div>
           </div>
 
+          <p id="fuResultCount" class="text-sm text-gray-600 mb-2 min-h-5" role="status" aria-live="polite"></p>
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto custom-scrollbar">
             <table class="w-full text-sm text-left whitespace-nowrap">
+              <caption class="sr-only">รายการเคสที่ติดตามได้</caption>
               <thead class="bg-gray-100 text-gray-600 border-b border-gray-200">
                 <tr><th class="p-3">Record_ID</th><th class="p-3">วันที่ล่าสุด</th><th class="p-3">HN</th><th class="p-3">ชื่อ-สกุล</th><th class="p-3">หอผู้ป่วย / แผนก</th><th class="p-3">สถานะล่าสุด</th><th class="p-3 text-center">จัดการ</th></tr>
               </thead>
@@ -331,7 +361,7 @@
         <div id="followUpModal" role="dialog" aria-modal="true" aria-labelledby="followUpModalTitle" class="fixed inset-0 bg-gray-900/60 z-50 hidden flex justify-center items-center p-4">
           <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl">
             <div class="bg-gradient-to-r from-[#3d82af] to-[#2c6385] p-4 text-white flex justify-between items-center rounded-t-2xl shrink-0">
-              <h3 id="followUpModalTitle" class="font-bold text-lg flex items-center"><span class="mr-2">📝</span> บันทึกการติดตาม (อัปเดตข้อมูล)</h3>
+              <h3 id="followUpModalTitle" class="font-bold text-lg flex items-center"><span class="mr-2"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg></span> บันทึกการติดตาม (อัปเดตข้อมูล)</h3>
               <button type="button" aria-label="ปิด" onclick="closeModal('followUpModal')" class="text-3xl leading-none hover:text-gray-200 min-w-11 min-h-11">&times;</button>
             </div>
             
@@ -349,7 +379,7 @@
 
                 <div class="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center">
-                    <h4 class="font-bold text-gray-700 flex items-center"><span class="mr-2 text-lg">📂</span> ข้อมูลทั่วไป (ดึงจากประวัติเดิม)</h4>
+                    <h4 class="font-bold text-gray-700 flex items-center"><span class="mr-2 text-lg"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-folder"/></svg></span> ข้อมูลทั่วไป (ดึงจากประวัติเดิม)</h4>
                     <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm hover:bg-blue-50 transition">
                       <input type="checkbox" id="fu_edit_toggle" name="fu_edit_toggle" class="form-checkbox h-4 w-4 text-[#3d82af] rounded" onchange="toggleFuEditGeneral()">
                       <span class="text-xs font-bold text-[#3d82af]">แก้ไขข้อมูลใหม่</span>
@@ -412,7 +442,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-4 overflow-hidden">
-                    <div class="bg-red-50 px-4 py-3 border-b border-red-100 flex items-center"><span class="mr-2">💰</span><h4 class="font-bold text-red-700 text-sm">อนุเคราะห์ค่ารักษาพยาบาล (ถ้ามี)</h4></div>
+                    <div class="bg-red-50 px-4 py-3 border-b border-red-100 flex items-center"><span class="mr-2"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-money"/></svg></span><h4 class="font-bold text-red-700 text-sm">อนุเคราะห์ค่ารักษาพยาบาล (ถ้ามี)</h4></div>
                     <div class="p-4">
                        <select name="financeType" id="fuFinanceTypeSelect" class="w-full max-w-md border rounded p-2 text-sm mb-3" onchange="toggleFuFinanceDetails()">
                           <option value="">-- ไม่ระบุ / ไม่มีการสงเคราะห์ --</option><option value="อนุเคราะห์">อนุเคราะห์</option><option value="ค้างชำระ">ค้างชำระ</option>
@@ -439,17 +469,17 @@
                 <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                     <label class="block text-sm font-bold text-gray-700 mb-1">แผนการทำงานต่อ (Plan)</label><textarea name="planUpdate" rows="2" class="input-field text-sm mb-4"></textarea>
                     
-                    <label class="block text-sm font-bold text-gray-700 mb-2">📌 ปรับปรุงสถานะล่าสุด</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-pin"/></svg>ปรับปรุงสถานะล่าสุด</label>
                     <div class="flex gap-3">
-                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-green-50 hover:border-green-200 transition"><input type="radio" name="statusUpdate" value="ยุติบริการ" class="mr-1 sr-only" required> <span class="text-green-700 font-bold text-sm">✅ ยุติบริการ</span></label>
-                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-yellow-50 hover:border-yellow-200 transition"><input type="radio" name="statusUpdate" value="อยู่ระหว่างการติดตาม" class="mr-1 sr-only"> <span class="text-yellow-600 font-bold text-sm">🔄 ติดตามต่อ</span></label>
-                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-blue-50 hover:border-blue-200 transition bg-blue-50 border-blue-200"><input type="radio" name="statusUpdate" value="กำลังให้บริการ" class="mr-1 sr-only" checked> <span class="text-blue-600 font-bold text-sm">⏳ กำลังให้บริการ</span></label>
+                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-green-50 hover:border-green-200 transition"><input type="radio" name="statusUpdate" value="ยุติบริการ" class="mr-1 sr-only" required> <span class="text-green-700 font-bold text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>ยุติบริการ</span></label>
+                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-yellow-50 hover:border-yellow-200 transition"><input type="radio" name="statusUpdate" value="อยู่ระหว่างการติดตาม" class="mr-1 sr-only"> <span class="text-yellow-600 font-bold text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>ติดตามต่อ</span></label>
+                        <label class="fu-status-opt flex-1 text-center cursor-pointer bg-white px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af] hover:bg-blue-50 hover:border-blue-200 transition bg-blue-50 border-blue-200"><input type="radio" name="statusUpdate" value="กำลังให้บริการ" class="mr-1 sr-only" checked> <span class="text-blue-600 font-bold text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>กำลังให้บริการ</span></label>
                     </div>
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3">
                   <button type="button" onclick="closeModal('followUpModal')" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-xl font-bold border border-gray-300">ยกเลิก</button>
-                  <button type="submit" class="bg-theme text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme">💾 บันทึกอัปเดต</button>
+                  <button type="submit" class="bg-theme text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>บันทึกอัปเดต</button>
                 </div>
               </form>
             </div>
@@ -458,7 +488,7 @@
 
         <!-- ================= 3. หน้าค้นหาประวัติ ================= -->
         <div id="page-search" class="page-section">
-          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-gray-500 pl-3">🔍 ค้นหาประวัติผู้ใช้บริการ</h1></div>
+          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-gray-500 pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-search"/></svg>ค้นหาประวัติผู้ใช้บริการ</h1></div>
           
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -479,7 +509,7 @@
           </div>
 
           <div id="searchResultArea" class="space-y-4">
-             <div class="text-center py-10 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300"><span class="text-4xl block mb-2">📭</span> ระบุเงื่อนไขและกดค้นหา</div>
+             <div class="text-center py-10 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300"><span class="text-4xl block mb-2"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-inbox"/></svg></span> ระบุเงื่อนไขและกดค้นหา</div>
           </div>
 
           <div id="oldDbResultArea" class="space-y-4"></div>
@@ -487,7 +517,7 @@
 
         <!-- ================= 4. หน้าออกรายงาน Excel ================= -->
         <div id="page-export" class="page-section">
-          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3">📥 ออกรายงาน Excel</h1></div>
+          <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-green-500 pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>ออกรายงาน Excel</h1></div>
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                <div><label class="block text-sm font-bold text-gray-700 mb-1">ประเภทรายงาน</label><select id="reportType" class="input-field"><option value="service">สถิติการให้บริการ</option><option value="financial">สถิติการเงิน/อนุเคราะห์</option></select></div>
@@ -507,8 +537,8 @@
                </div>
             </div>
             <div class="flex gap-3 mt-4 pt-4 border-t border-gray-100">
-               <button type="button" onclick="loadReportData()" class="bg-[#3d82af] text-white px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-[#2c6385] transition">🔍 ดึงข้อมูลตรวจสอบ</button>
-               <button type="button" onclick="exportToExcel()" class="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-green-700 transition">📊 ดาวน์โหลด Excel</button>
+               <button type="button" onclick="loadReportData()" class="bg-[#3d82af] text-white px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-[#2c6385] transition"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-search"/></svg>ดึงข้อมูลตรวจสอบ</button>
+               <button type="button" onclick="exportToExcel()" class="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-green-700 transition"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>ดาวน์โหลด Excel</button>
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -525,8 +555,8 @@
         <!-- ================= 5. หน้า Dashboard ================= -->
         <div id="page-dashboard" class="page-section" aria-busy="false">
           <div class="mb-4 flex justify-between items-center border-b pb-4">
-            <h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3">📊 Dashboard สถิติสังคมสงเคราะห์</h1>
-            <button type="button" onclick="loadDashboard()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center hover:bg-gray-50"><span class="mr-2">🔄</span> รีเฟรชข้อมูล</button>
+            <h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>Dashboard สถิติสังคมสงเคราะห์</h1>
+            <button type="button" onclick="loadDashboard()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center hover:bg-gray-50"><span class="mr-2"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg></span> รีเฟรชข้อมูล</button>
           </div>
 
           <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -547,8 +577,8 @@
           </div>
           
           <div role="tablist" aria-label="มุมมอง Dashboard" class="flex border-b border-gray-200 mb-6 bg-white rounded-t-xl px-4 pt-2 shadow-sm overflow-x-auto">
-            <button type="button" role="tab" aria-selected="true" aria-controls="dash-tab-overview" id="tab-btn-dash-overview" class="py-3 px-5 border-b-4 font-bold text-[#3d82af] border-[#3d82af] transition hover:bg-gray-50" onclick="switchDashTab('overview')">📊 สถิติภาพรวม</button>
-            <button type="button" role="tab" aria-selected="false" aria-controls="dash-tab-finance" id="tab-btn-dash-finance" class="py-3 px-5 border-b-4 font-medium text-gray-500 border-transparent hover:text-[#3d82af] hover:bg-gray-50 transition" onclick="switchDashTab('finance')">💰 ข้อมูลการเงิน</button>
+            <button type="button" role="tab" aria-selected="true" aria-controls="dash-tab-overview" id="tab-btn-dash-overview" class="py-3 px-5 border-b-4 font-bold text-[#3d82af] border-[#3d82af] transition hover:bg-gray-50" onclick="switchDashTab('overview')"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>สถิติภาพรวม</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="dash-tab-finance" id="tab-btn-dash-finance" class="py-3 px-5 border-b-4 font-medium text-gray-500 border-transparent hover:text-[#3d82af] hover:bg-gray-50 transition" onclick="switchDashTab('finance')"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-money"/></svg>ข้อมูลการเงิน</button>
           </div>
 
           <div id="dash-tab-overview" role="tabpanel" class="block">
@@ -578,8 +608,8 @@
 
               <div id="pendingCasesContainer" class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6 hidden">
                   <div class="flex justify-between items-center border-b pb-2 mb-4">
-                      <h3 class="font-bold text-orange-600 flex items-center"><span class="mr-2 text-xl">⏳</span> รายการเคสค้าง/กำลังติดตาม</h3>
-                      <button type="button" onclick="copyPendingCases()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1.5 px-3 rounded-lg shadow-sm border border-gray-300">📋 คัดลอกตาราง</button>
+                      <h3 class="font-bold text-orange-600 flex items-center"><span class="mr-2 text-xl"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg></span> รายการเคสค้าง/กำลังติดตาม</h3>
+                      <button type="button" onclick="copyPendingCases()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1.5 px-3 rounded-lg shadow-sm border border-gray-300"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg>คัดลอกตาราง</button>
                   </div>
                   <div class="overflow-x-auto">
                       <table id="pendingCasesTable" class="min-w-full text-sm">
@@ -593,7 +623,7 @@
           <!-- Tab 2: ข้อมูลการเงิน -->
           <div id="dash-tab-finance" role="tabpanel" class="hidden">
               <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
-                <h3 class="font-bold text-red-700 mb-4 border-b pb-2">💰 ภาพรวมสถิติการอนุเคราะห์ค่ารักษาพยาบาลและค้างชำระ</h3>
+                <h3 class="font-bold text-red-700 mb-4 border-b pb-2"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-money"/></svg>ภาพรวมสถิติการอนุเคราะห์ค่ารักษาพยาบาลและค้างชำระ</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-gray-50 p-4 rounded-xl text-center border border-gray-100"><h4 class="text-xs font-bold text-gray-500">ค่ารักษาเต็มจำนวน</h4><p id="dashTotalCost" class="text-xl font-black text-gray-800 mt-1">0.00 ฿</p></div>
                     <div class="bg-blue-50 p-4 rounded-xl text-center border border-blue-100"><h4 class="text-xs font-bold text-blue-700">ชำระเอง</h4><p id="dashSelfPay" class="text-xl font-black text-blue-800 mt-1">0.00 ฿</p></div>
@@ -608,10 +638,10 @@
               </div>
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">📍 ที่อยู่ผู้รับบริการ</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableAddress" class="divide-y divide-gray-100"></tbody></table></div></div>
-                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🎯 กลุ่มเป้าหมาย</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableTarget" class="divide-y divide-gray-100"></tbody></table></div></div>
-                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🌎 สัญชาติ</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableNation" class="divide-y divide-gray-100"></tbody></table></div></div>
-                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm">🩺 โรค ICD10</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableICD" class="divide-y divide-gray-100"></tbody></table></div></div>
+                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-mappin"/></svg>ที่อยู่ผู้รับบริการ</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableAddress" class="divide-y divide-gray-100"></tbody></table></div></div>
+                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-target"/></svg>กลุ่มเป้าหมาย</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableTarget" class="divide-y divide-gray-100"></tbody></table></div></div>
+                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-globe"/></svg>สัญชาติ</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableNation" class="divide-y divide-gray-100"></tbody></table></div></div>
+                 <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"><h3 class="font-bold text-gray-700 mb-2 border-b pb-2 text-sm"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-steth"/></svg>โรค ICD10</h3><div class="overflow-y-auto h-48 custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="finTableICD" class="divide-y divide-gray-100"></tbody></table></div></div>
               </div>
           </div>
         </div>
@@ -619,7 +649,7 @@
         <!-- ================= 6. หน้าจัดการผู้ใช้งาน (เฉพาะ admin) ================= -->
         <div id="page-users" class="page-section">
           <div class="mb-6 flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3">👤 จัดการผู้ใช้งาน</h1>
+            <h1 class="text-2xl font-bold text-gray-800 border-l-4 border-[#3d82af] pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>จัดการผู้ใช้งาน</h1>
             <button onclick="openUserModal('create')" class="bg-theme text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme transition">+ เพิ่มผู้ใช้งาน</button>
           </div>
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -684,7 +714,7 @@
               <div id="userFormError" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2"></div>
               <div class="flex justify-end gap-3 pt-2">
                 <button type="button" onclick="closeModal('userModal')" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-xl font-bold border border-gray-300">ยกเลิก</button>
-                <button type="submit" id="userForm_submitBtn" class="bg-theme text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme">💾 บันทึก</button>
+                <button type="submit" id="userForm_submitBtn" class="bg-theme text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover-bg-theme"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>บันทึก</button>
               </div>
             </form>
           </div>
@@ -747,13 +777,13 @@
 
             if (zCategoryCache === null) {
                 // ยังไม่เคยโหลดฐานข้อมูลสำเร็จ (ครั้งแรกที่ใช้งาน หรือครั้งก่อนโหลดพลาด) — แสดงสถานะกำลังโหลด/ลองใหม่ แล้วแสดงผลซ้ำอัตโนมัติเมื่อโหลดเสร็จ
-                box.innerHTML = '<div class="px-3 py-2 text-xs text-gray-500">⏳ กำลังโหลดฐานข้อมูลหมวด Z...</div>';
+                box.innerHTML = '<div class="px-3 py-2 text-xs text-gray-500"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>กำลังโหลดฐานข้อมูลหมวด Z...</div>';
                 box.classList.remove('hidden');
                 loadZCategoryDB().then(function(result) {
                     if (document.activeElement !== input) return;
                     if (result === null) {
                         // โหลดไม่สำเร็จจริง ๆ (ไม่ใช่แค่ "ไม่พบที่ตรงกัน") แจ้งให้ชัดเจนแยกจากกรณีไม่พบรายการ
-                        box.innerHTML = '<div class="px-3 py-2 text-xs text-red-500">⚠️ โหลดฐานข้อมูลหมวด Z ไม่สำเร็จ (ตรวจสอบว่า Deploy Apps Script เวอร์ชันล่าสุดแล้วหรือยัง) — พิมพ์เองได้ตามปกติ กดช่องนี้อีกครั้งเพื่อลองใหม่</div>';
+                        box.innerHTML = '<div class="px-3 py-2 text-xs text-red-500"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg>โหลดฐานข้อมูลหมวด Z ไม่สำเร็จ (ตรวจสอบว่า Deploy Apps Script เวอร์ชันล่าสุดแล้วหรือยัง) — พิมพ์เองได้ตามปกติ กดช่องนี้อีกครั้งเพื่อลองใหม่</div>';
                         box.classList.remove('hidden');
                     } else {
                         renderMatches(input.value);
@@ -1357,16 +1387,65 @@
     }
 
     // ผูก <label> กับช่องกรอกในกล่องเดียวกันอัตโนมัติ (คลิกที่ชื่อช่องแล้วโฟกัสช่อง / โปรแกรมอ่านหน้าจออ่านชื่อช่องได้)
+    // ผูก <label> กับช่องกรอกของมัน (คลิกที่ชื่อช่องแล้วเคอร์เซอร์ไปที่ช่อง + โปรแกรมอ่านหน้าจออ่านชื่อช่องได้)
+    // หาช่องจาก "พี่น้องถัดไป" ของ label ก่อน (แม่นกว่า) — เดิมหยิบช่องแรกใน parent ซึ่งผิดเมื่อ parent มีหลายช่อง
+    var FIELD_SEL = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea';
     function autoLinkLabels() {
         var seq = 0;
+        var visibleField = function(el) { return (el && el._flatpickr && el._flatpickr.altInput) ? el._flatpickr.altInput : el; };
         document.querySelectorAll('label').forEach(function(lbl) {
             if (lbl.htmlFor || lbl.querySelector('input,select,textarea')) return;
-            var parent = lbl.parentElement; if (!parent) return;
-            var field = parent.querySelector('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea');
+            var field = null;
+            for (var sib = lbl.nextElementSibling; sib && !field; sib = sib.nextElementSibling) {
+                if (sib.tagName === 'LABEL') break;                       // ถึง label ตัวถัดไปแล้ว ไม่ใช่ของเรา
+                if (sib.matches(FIELD_SEL)) field = sib;
+                else if (sib.querySelectorAll(FIELD_SEL).length === 1) field = sib.querySelector(FIELD_SEL);
+                else if (sib.querySelector('input[type=hidden].flatpickr-input')) field = sib.querySelector('input.flatpickr-input');
+            }
+            if (!field) {
+                var parent = lbl.parentElement;
+                var all = parent ? parent.querySelectorAll(FIELD_SEL) : [];
+                if (all.length === 1 && parent.querySelectorAll('label').length === 1) field = all[0];
+            }
+            field = visibleField(field);
             if (!field) return;
             if (!field.id) field.id = 'fld_auto_' + (++seq);
             lbl.htmlFor = field.id;
         });
+        // ช่องที่ไม่มี label (เช่น ตัวกรองค้นหา) → ตั้งชื่อให้โปรแกรมอ่านหน้าจอจาก placeholder หรือตัวเลือกแรก
+        document.querySelectorAll(FIELD_SEL).forEach(function(el) {
+            if (el.getAttribute('aria-label') || el.getAttribute('aria-labelledby')) return;
+            if (el.id && document.querySelector('label[for="' + el.id + '"]')) return;
+            if (el.closest('label')) return;
+            var name = el.getAttribute('placeholder') || '';
+            if (!name && el.tagName === 'SELECT' && el.options.length) name = el.options[0].text;
+            name = String(name).replace(/^[\s\-–]+|[\s\-–.]+$/g, '').trim();
+            if (name) el.setAttribute('aria-label', name);
+        });
+    }
+
+    // โครงร่างขณะโหลดในตาราง (แทนข้อความ "กำลังโหลด")
+    function skeletonRows(cols, rows) {
+        var w = ['w-16', 'w-20', 'w-14', 'w-32', 'w-24', 'w-20', 'w-16'];
+        var html = '';
+        for (var r = 0; r < (rows || 5); r++) {
+            html += '<tr aria-hidden="true">';
+            for (var c = 0; c < cols; c++) html += '<td class="p-3"><span class="sk ' + w[c % w.length] + '"></span></td>';
+            html += '</tr>';
+        }
+        return html;
+    }
+    function skeletonCards(n) {
+        var html = '<p class="sr-only" role="status">กำลังค้นหาข้อมูล...</p>';
+        for (var i = 0; i < (n || 3); i++) {
+            html += '<div class="bg-white rounded-xl border border-gray-200 p-4 mb-4" aria-hidden="true">' +
+                    '<span class="sk w-48 mb-3"></span><span class="sk w-64 mb-4"></span>' +
+                    '<span class="sk w-full mb-2"></span><span class="sk w-3/4"></span></div>';
+        }
+        return html;
+    }
+    function prefersReducedMotion() {
+        try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
     }
 
     // ==========================================
@@ -1387,6 +1466,21 @@
                     if (m && !m.classList.contains('hidden')) closeModal(id);
                 });
             }
+        });
+
+        // ค้นหา: กด Enter ในช่องค้นหาได้เลย / หน้าติดตามกรองทันทีขณะพิมพ์หรือเปลี่ยนตัวกรอง (กรองจากข้อมูลที่โหลดไว้แล้ว ไม่โหลดซ้ำ)
+        var onEnter = function(id, fn) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); fn(); } });
+        };
+        onEnter('globalSearchInput', performSearch);
+        onEnter('fuSearchKeyword', searchForFollowUp);
+        var fuTimer = null;
+        var fuLive = function() { clearTimeout(fuTimer); fuTimer = setTimeout(searchForFollowUp, 300); };
+        var fuKw = document.getElementById('fuSearchKeyword');
+        if (fuKw) fuKw.addEventListener('input', fuLive);
+        ['fuSearchFY', 'fuSearchMonth', 'fuSearchWorker'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.addEventListener('change', fuLive);
         });
 
         // เตือนเมื่อจะปิด/รีเฟรชหน้าในขณะที่ฟอร์มบันทึกเคสใหม่ยังมีข้อมูลที่ยังไม่บันทึก
@@ -1410,7 +1504,8 @@
                 visible.setAttribute('aria-invalid', 'true');
                 if (!firstInvalidShown) {
                     firstInvalidShown = true;
-                    try { visible.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {}
+                    try { visible.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); } catch (x) {}
+                    try { visible.focus({ preventScroll: true }); } catch (x) {}
                     setTimeout(function() { firstInvalidShown = false; }, 500);
                 }
             }, true);
@@ -1755,7 +1850,7 @@
         var tools = document.createElement('div');
         tools.className = 'mb-2 space-y-2';
         tools.innerHTML =
-            '<input type="search" class="acc-search input-field py-2 text-sm" placeholder="🔎 ค้นหาด้วยรหัสหรือคำ เช่น 1405 หรือ ผู้ดูแล" aria-label="ค้นหารายการ">' +
+            '<input type="search" class="acc-search input-field py-2 text-sm" placeholder="ค้นหาด้วยรหัสหรือคำ เช่น 1405 หรือ ผู้ดูแล" aria-label="ค้นหารายการ">' +
             '<div class="acc-summary hidden text-xs bg-blue-50 border border-blue-100 text-blue-900 rounded-lg px-3 py-2" aria-live="polite"></div>';
         container.parentNode.insertBefore(tools, container);
         container._accSearch = tools.querySelector('.acc-search');
@@ -1950,7 +2045,7 @@
       var btn = form.querySelector('button[type="submit"]'); 
       var txt = btn.innerHTML;
       
-      btn.disabled = true; btn.innerHTML = '⏳ กำลังบันทึก...';
+      btn.disabled = true; btn.innerHTML = '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>กำลังบันทึก...';
       Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
 
       var fd = new FormData(form);
@@ -1990,14 +2085,14 @@
             if (actionName === 'saveRecord') {
                 // แสดงเลข Record ID ค้างไว้จนผู้ใช้กดปิด พร้อมปุ่มคัดลอก (เดิมหายไปใน 1.5 วินาที)
                 var rid = res.recordId || ((String(res.message || '').match(/ID:\s*([A-Z0-9]+)/) || [])[1] || '');
-                var warnHtml = (res.warnings && res.warnings.length) ? '<div class="mt-3 text-left text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2">⚠ ' + res.warnings.map(escapeHtml).join('<br>⚠ ') + '</div>' : '';
+                var warnHtml = (res.warnings && res.warnings.length) ? '<div class="mt-3 text-left text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg>' + res.warnings.map(escapeHtml).join('<br><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg>') + '</div>' : '';
                 Swal.fire({
                     icon: 'success', title: 'บันทึกข้อมูลเรียบร้อย',
                     html: (rid ? '<p class="text-sm text-gray-600">เลขที่บันทึก (Record ID)</p><p class="text-3xl font-black text-[#3d82af] tracking-wider my-1">' + escapeHtml(rid) + '</p>' : escapeHtml(res.message || '')) + warnHtml,
                     confirmButtonText: 'ตกลง', confirmButtonColor: '#3d82af',
-                    showDenyButton: !!rid, denyButtonText: '📋 คัดลอก ID', denyButtonColor: '#64748b',
+                    showDenyButton: !!rid, denyButtonText: '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg>คัดลอก ID', denyButtonColor: '#64748b',
                     preDeny: function() {
-                        var done = function() { Swal.getDenyButton().textContent = '✅ คัดลอกแล้ว'; };
+                        var done = function() { Swal.getDenyButton().innerHTML = '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>คัดลอกแล้ว'; };
                         try { navigator.clipboard.writeText(rid).then(done, done); } catch (x) { done(); }
                         return false; // ไม่ปิดกล่อง
                     }
@@ -2056,15 +2151,38 @@
     }
 
     // แคชประวัติผู้ป่วยไว้ใช้ซ้ำ 60 วินาที (ไม่ต้องดึงทั้งชีตใหม่ทุกครั้งที่สลับหน้า/กดค้นหา) และล้างแคชทันทีหลังบันทึก
-    var __patientCache = { at: 0, data: null, pending: null };
-    function invalidatePatientCache() { __patientCache.at = 0; __patientCache.data = null; }
+    // ประวัติผู้ป่วย: เก็บในหน่วยความจำของหน้าเว็บ (ไม่เก็บลงเครื่อง เพราะเป็นข้อมูลผู้ป่วย)
+    // - ภายใน 20 วินาทีใช้ข้อมูลที่มีอยู่ทันที
+    // - หลังจากนั้นส่ง "เวอร์ชันข้อมูล" (v) ที่มีอยู่ไปถาม ถ้าไม่มีอะไรเปลี่ยน เซิร์ฟเวอร์ตอบสั้น ๆ ว่าไม่เปลี่ยน ไม่ต้องโหลดใหม่ทั้งหมด
+    // - หลังบันทึกจะล้าง "เวลา" แต่เก็บข้อมูลเดิมไว้เทียบเวอร์ชัน (เซิร์ฟเวอร์ล้างแคชฝั่งตัวเองแล้ว จึงได้ข้อมูลใหม่แน่นอน)
+    var __patientCache = { at: 0, data: null, v: '', pending: null };
+    function invalidatePatientCache() { __patientCache.at = 0; }
+    function phRowsToObjects(fields, rows) {
+        var out = new Array(rows.length), n = fields.length;
+        for (var i = 0; i < rows.length; i++) {
+            var o = {}, r = rows[i];
+            for (var j = 0; j < n; j++) o[fields[j]] = r[j];
+            out[i] = o;
+        }
+        return out;
+    }
     function getPatientHistory(force) {
-        if (!force && __patientCache.data && (Date.now() - __patientCache.at) < 60000) {
+        if (!force && __patientCache.data && (Date.now() - __patientCache.at) < 20000) {
             return Promise.resolve(__patientCache.data.slice());
         }
         if (__patientCache.pending) return __patientCache.pending.then(function(d) { return d.slice(); });
-        __patientCache.pending = gasApiGet('searchPatientHistory').then(function(data) {
-            __patientCache.data = Array.isArray(data) ? data : [];
+        var known = (!force && __patientCache.data) ? __patientCache.v : '';
+        __patientCache.pending = gasApiGet('searchPatientHistory', { payload: JSON.stringify({ format: 2, v: known }) }).then(function(res) {
+            if (Array.isArray(res)) {                       // เซิร์ฟเวอร์เวอร์ชันเก่า (ยังไม่อัปเดต Code.gs)
+                __patientCache.data = res; __patientCache.v = '';
+            } else if (res && res.notModified && __patientCache.data) {
+                // ข้อมูลไม่เปลี่ยน — ใช้ของเดิม
+            } else if (res && Array.isArray(res.rows)) {
+                __patientCache.data = phRowsToObjects(res.fields || [], res.rows);
+                __patientCache.v = res.v || '';
+            } else {
+                __patientCache.data = []; __patientCache.v = '';
+            }
             __patientCache.at = Date.now();
             __patientCache.pending = null;
             return __patientCache.data;
@@ -2095,12 +2213,13 @@
       var wkFilter = document.getElementById('fuSearchWorker').value.toLowerCase().trim();
 
       var tbody = document.getElementById('fuTableBody');
-      tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500"><span class="animate-pulse">กำลังโหลดข้อมูล...</span></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="sr-only" role="status">กำลังโหลดข้อมูล...</td></tr>' + skeletonRows(7, 5);
+      tbody.setAttribute('aria-busy', 'true');
       
       getPatientHistory().then(function(data) { 
         allPatientData = data.reverse(); 
         var tbody = document.getElementById('fuTableBody'); 
-        tbody.innerHTML = '';
+        tbody.innerHTML = ''; tbody.setAttribute('aria-busy', 'false');
         
         // หากลุ่ม Record_ID เพื่อหาค่าล่าสุด
         var latestObj = {};
@@ -2121,7 +2240,7 @@
             // กฎเหล็ก: ยุติบริการ ห้ามแสดงใน Follow-up เด็ดขาด!
             if (item.status === 'ยุติบริการ') continue;
 
-            var mKw = !keyword || (item.hn.toLowerCase().trim() === keyword || item.name.toLowerCase().indexOf(keyword) !== -1);
+            var mKw = !keyword || (String(item.hn || '').toLowerCase().trim() === keyword || String(item.name || '').toLowerCase().indexOf(keyword) !== -1 || String(item.recordId || '').toLowerCase() === keyword);
             var mWk = !wkFilter || (item.worker && item.worker.toLowerCase().indexOf(wkFilter) !== -1);
             var mDate = true;
             if (fyFilter || moFilter) {
@@ -2138,6 +2257,7 @@
 
         if(filtered.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500">ไม่พบประวัติที่ตรงกับเงื่อนไข หรือเคสถูกยุติบริการไปแล้ว</td></tr>';
+            var fuCount0 = document.getElementById('fuResultCount'); if (fuCount0) fuCount0.textContent = '';
             return;
         }
 
@@ -2159,8 +2279,11 @@
             '<td class="p-3 text-center">' + btn + '</td></tr>';
         }
         tbody.innerHTML = rowsHtml;
+        var fuCount = document.getElementById('fuResultCount');
+        if (fuCount) fuCount.innerHTML = 'พบ <b>' + filtered.length + '</b> เคสที่ยังให้บริการ/ติดตามอยู่';
       }).catch(function(err) { 
-        document.getElementById('fuTableBody').innerHTML = '<tr><td colspan="7" class="p-8 text-center text-red-500">เกิดข้อผิดพลาด: ' + escapeHtml(err.toString()) + '</td></tr>';
+        var tb = document.getElementById('fuTableBody'); tb.setAttribute('aria-busy', 'false');
+        tb.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-red-600" role="alert">เกิดข้อผิดพลาด: ' + escapeHtml(err.toString()) + ' <button type="button" onclick="searchForFollowUp()" class="ml-2 underline font-bold min-h-11">ลองใหม่</button></td></tr>';
       });
     }
 
@@ -2343,7 +2466,7 @@
       var wkFilter = document.getElementById('globalSearchWorker').value.toLowerCase().trim();
 
       var area = document.getElementById('searchResultArea');
-      area.innerHTML = '<div class="text-center py-10" role="status"><span class="animate-pulse text-gray-500">กำลังค้นหาข้อมูล...</span></div>';
+      area.innerHTML = skeletonCards(3);
       searchOldDatabaseUI(keyword);
 
       getPatientHistory().then(function(data) { 
@@ -2386,7 +2509,7 @@
         area.innerHTML = '<p class="text-sm text-gray-600 mb-2" role="status">พบ <b>' + filtered.length + '</b> รายการ</p><div id="searchResultList"></div><div id="searchMoreWrap" class="text-center"></div>';
         renderMoreSearchResults();
       }).catch(function(err) { 
-        document.getElementById('searchResultArea').innerHTML = '<div class="text-center py-10 text-red-500">เกิดข้อผิดพลาด: ' + escapeHtml(err.toString()) + '</div>';
+        document.getElementById('searchResultArea').innerHTML = '<div class="text-center py-10 text-red-600" role="alert">เกิดข้อผิดพลาด: ' + escapeHtml(err.toString()) + ' <button type="button" onclick="performSearch()" class="ml-2 underline font-bold min-h-11">ลองใหม่</button></div>';
       });
     }
 
@@ -2415,7 +2538,7 @@
           } else { intvHtml = '<span class="text-gray-500 text-xs">-</span>'; }
 
           var ageDisplay = item.dob ? getAgeText(item.dob) : (item.age ? item.age + " ปี" : "-");
-          var icon = item.status === 'ยุติบริการ' ? '✅ ' : (item.status === 'อยู่ระหว่างการติดตาม' ? '🔄 ' : '⏳ ');
+          var icon = item.status === 'ยุติบริการ' ? '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>' : (item.status === 'อยู่ระหว่างการติดตาม' ? '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>' : '<svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>');
           var statusBadge = '<span class="' + statusBadgeClass(item.status) + ' px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">' + icon + E(item.status) + '</span>';
           var btnUpdate = item.status !== 'ยุติบริการ' ? '<button type="button" data-rid="' + E(item.recordId) + '" onclick="openFollowUpModal(this.getAttribute(\'data-rid\'))" class="bg-[#3d82af] text-white px-4 py-2 min-h-11 rounded-lg text-xs font-bold hover:bg-[#2c6385] shadow-sm ml-2">อัปเดต</button>' : '';
 
@@ -2431,10 +2554,10 @@
                         '<div><span class="text-gray-500">กลุ่มเป้าหมาย:</span> <span class="font-bold">' + E(item.target) + '</span></div>' +
                         '<div class="md:col-span-2"><span class="text-gray-500">หอผู้ป่วย/แผนก:</span> <span class="font-bold">' + E(item.ward) + '</span></div>' +
                     '</div>' +
-                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">📌 ปัญหาทางสังคม</p><div>' + probHtml + '</div></div>' +
-                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">🛠️ บริการทางสังคม</p><div>' + intvHtml + '</div></div>' +
-                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">📝 รายละเอียดปัญหาเพิ่มเติม (Note)</p><div class="text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">' + E(item.detail || '-') + '</div></div>' +
-                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">🎯 แผนการทำงานต่อ (Plan)</p><div class="text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">' + E(item.plan || '-') + '</div></div>' +
+                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-pin"/></svg>ปัญหาทางสังคม</p><div>' + probHtml + '</div></div>' +
+                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-wrench"/></svg>บริการทางสังคม</p><div>' + intvHtml + '</div></div>' +
+                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-note"/></svg>รายละเอียดปัญหาเพิ่มเติม (Note)</p><div class="text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">' + E(item.detail || '-') + '</div></div>' +
+                    '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-target"/></svg>แผนการทำงานต่อ (Plan)</p><div class="text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">' + E(item.plan || '-') + '</div></div>' +
                     '<div class="mt-3 pt-3 border-t border-gray-100 flex justify-between text-xs text-gray-500"><span>ผู้บันทึก: ' + E(item.worker) + '</span></div>' +
                 '</div></div>';
         }
@@ -2459,7 +2582,7 @@
 
         var html = '<div class="flex items-center gap-3 mb-3 mt-2">' +
                       '<span class="h-px flex-1 bg-gray-200"></span>' +
-                      '<span class="text-xs font-bold text-gray-500 tracking-wide whitespace-nowrap">🗄️ พบประวัติในฐานข้อมูลเดิม (ปีงบประมาณก่อน) ' + records.length + ' รายการ</span>' +
+                      '<span class="text-xs font-bold text-gray-500 tracking-wide whitespace-nowrap"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-archive"/></svg>พบประวัติในฐานข้อมูลเดิม (ปีงบประมาณก่อน) ' + records.length + ' รายการ</span>' +
                       '<span class="h-px flex-1 bg-gray-200"></span>' +
                    '</div>';
 
@@ -2473,7 +2596,7 @@
 
           html += '<div class="bg-amber-50/40 rounded-xl border border-amber-200 shadow-sm overflow-hidden mb-4">' +
                     '<div class="bg-amber-100/60 px-4 py-2.5 border-b border-amber-200 flex flex-wrap gap-2 justify-between items-center">' +
-                      '<div class="text-xs font-bold text-amber-800">🗄️ ข้อมูลจากฐานข้อมูลเดิม' + (item.name ? (' — ' + E(item.name)) : '') + '</div>' +
+                      '<div class="text-xs font-bold text-amber-800"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-archive"/></svg>ข้อมูลจากฐานข้อมูลเดิม' + (item.name ? (' — ' + E(item.name)) : '') + '</div>' +
                       '<div class="text-xs text-gray-600">วันที่: ' + E(item.date || '-') + '</div>' +
                     '</div>' +
                     '<div class="p-4 text-sm">' +
@@ -2485,9 +2608,9 @@
                         (item.moo || item.subDist || item.dist || item.prov ?
                           '<div class="md:col-span-2"><span class="text-gray-500">ที่อยู่:</span> <span class="font-bold">ม.' + E(item.moo || '-') + ' ต.' + E(item.subDist || '-') + ' อ.' + E(item.dist || '-') + ' จ.' + E(item.prov || '-') + '</span></div>' : '') +
                       '</div>' +
-                      '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">📌 ปัญหาทางสังคม</p><div>' + probHtml + '</div></div>' +
-                      (item.service ? '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1">🛠️ การให้บริการ</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100">' + E(item.service) + '</div></div>' : '') +
-                      (item.detail ? '<div><p class="text-xs font-bold text-gray-500 mb-1">📝 รายละเอียด</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100 whitespace-pre-line">' + E(item.detail) + '</div></div>' : '') +
+                      '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-pin"/></svg>ปัญหาทางสังคม</p><div>' + probHtml + '</div></div>' +
+                      (item.service ? '<div class="mb-3"><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-wrench"/></svg>การให้บริการ</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100">' + E(item.service) + '</div></div>' : '') +
+                      (item.detail ? '<div><p class="text-xs font-bold text-gray-500 mb-1"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-note"/></svg>รายละเอียด</p><div class="text-sm text-gray-700 bg-white/70 p-2 rounded border border-amber-100 whitespace-pre-line">' + E(item.detail) + '</div></div>' : '') +
                     '</div>' +
                   '</div>';
         });
