@@ -486,6 +486,90 @@
           </div>
         </div>
 
+
+        <!-- ================= หน้าต่างแก้ไขข้อมูลที่บันทึกแล้ว ================= -->
+        <div id="editRecordModal" role="dialog" aria-modal="true" aria-labelledby="editRecordTitle" class="fixed inset-0 bg-gray-900/60 z-50 hidden flex justify-center items-center p-4">
+          <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl">
+            <div class="bg-gradient-to-r from-slate-600 to-slate-800 p-4 text-white flex justify-between items-center rounded-t-2xl shrink-0">
+              <div>
+                <h3 id="editRecordTitle" class="font-bold text-lg flex items-center"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg>แก้ไขข้อมูลที่บันทึกแล้ว</h3>
+                <p id="ed_sub" class="text-xs text-slate-200 mt-0.5"></p>
+              </div>
+              <button type="button" aria-label="ปิด" onclick="closeModal('editRecordModal')" class="text-3xl leading-none hover:text-gray-200 min-w-11 min-h-11">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
+              <form id="editRecordForm" onsubmit="submitEditRecord(event)" novalidate>
+                <input type="hidden" name="row" id="ed_row"><input type="hidden" name="ts" id="ed_ts"><input type="hidden" name="recordId" id="ed_recordId">
+
+                <section class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-4">
+                  <h4 class="font-bold text-gray-700 mb-3 flex items-center gap-1.5"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg>ข้อมูลการให้บริการครั้งนี้</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">วันที่ให้บริการ</label><input type="text" id="ed_serviceDate" name="serviceDate" class="input-field text-sm" required></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">นักสังคมสงเคราะห์</label><select id="ed_worker" name="worker" class="input-field text-sm sw-dynamic-select" required><option value="">-- เลือกนักสังคมฯ --</option></select></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">AN</label><input type="text" id="ed_an" name="an" class="input-field text-sm"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ประเภทผู้ป่วย</label><select id="ed_patientType" name="patientType" class="input-field text-sm"></select></div>
+                    <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">หอผู้ป่วย / แผนก</label><select id="ed_ward" name="ward" class="input-field text-sm"></select></div>
+                  </div>
+                </section>
+
+                <section class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <h4 class="font-bold text-gray-700 flex items-center gap-1.5"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>ข้อมูลผู้ป่วย</h4>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm bg-sky-50 border border-sky-200 rounded-lg px-3 min-h-11">
+                      <input type="checkbox" id="ed_applyToCase" name="applyToCase" class="form-checkbox h-4 w-4 rounded" checked>
+                      <span class="font-bold text-sky-900">ปรับข้อมูลผู้ป่วยทุกครั้งของเคสนี้</span>
+                    </label>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">HN</label><input type="text" id="ed_hn" name="hn" class="input-field text-sm" required></div>
+                    <div class="md:col-span-2"><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อ - นามสกุล</label><input type="text" id="ed_fullName" name="fullName" class="input-field text-sm" required></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">เลขบัตรประชาชน / Passport</label><input type="text" id="ed_idCard" name="idCard" class="input-field text-sm" inputmode="numeric"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">วันเดือนปีเกิด</label><input type="text" id="ed_dob" name="dob" class="input-field text-sm"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">อายุ (ปี)</label><input type="number" id="ed_age" name="age" min="0" max="130" class="input-field text-sm"><p class="text-xs text-gray-500 mt-1">คำนวณจากวันเกิดให้อัตโนมัติ</p></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">สัญชาติ</label><select id="ed_nationalitySelect" name="nationalitySelect" class="input-field text-sm"></select></div>
+                    <div id="ed_natOtherWrap" class="hidden"><label class="block text-sm font-bold text-gray-700 mb-1">ระบุสัญชาติ</label><input type="text" id="ed_nationality" name="nationality" class="input-field text-sm"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">สิทธิการรักษา</label><select id="ed_insurance" name="insurance" class="input-field text-sm"></select></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">กลุ่มเป้าหมาย</label><select id="ed_targetGroup" name="targetGroup" class="input-field text-sm"></select></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ICD10</label><input type="text" id="ed_icd10" name="icd10" class="input-field text-sm"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวด Z</label><input type="text" id="ed_zCategory" name="zCategory" class="input-field text-sm" autocomplete="off" placeholder="เช่น Z59"></div>
+                    <div class="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <div><label class="block text-xs font-bold text-gray-600 mb-1">จังหวัด</label><select id="ed_province" name="province" class="input-field text-sm"></select></div>
+                      <div><label class="block text-xs font-bold text-gray-600 mb-1">อำเภอ</label><select id="ed_district" name="district" class="input-field text-sm"></select></div>
+                      <div><label class="block text-xs font-bold text-gray-600 mb-1">ตำบล</label><select id="ed_subDistrict" name="subDistrict" class="input-field text-sm"></select></div>
+                      <div><label class="block text-xs font-bold text-gray-600 mb-1">หมู่</label><input type="text" id="ed_moo" name="moo" class="input-field text-sm"></div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-4 space-y-4">
+                  <div><p class="block text-sm font-bold text-gray-700 mb-1">ปัญหาทางสังคม</p><div class="h-56 overflow-y-auto custom-scrollbar bg-gray-50 p-2 rounded-lg border border-gray-200" id="edSocialContainer"></div></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียดปัญหาเพิ่มเติม (Note)</label><textarea id="ed_detail" name="detail" rows="3" class="input-field text-sm"></textarea></div>
+                  <div><p class="block text-sm font-bold text-gray-700 mb-1">บริการที่ให้</p><div class="h-56 overflow-y-auto custom-scrollbar bg-gray-50 p-2 rounded-lg border border-gray-200" id="edInterventionContainer"></div></div>
+                  <div><label class="block text-sm font-bold text-gray-700 mb-1">แผนการให้บริการ / ความคืบหน้า</label><textarea id="ed_plan" name="plan" rows="3" class="input-field text-sm"></textarea></div>
+                </section>
+
+                <section class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-4">
+                  <fieldset>
+                    <legend class="text-sm font-bold text-gray-700 mb-2">สถานะของเคส <span class="font-normal text-gray-500">(มีผลกับทุกครั้งของเคส)</span></legend>
+                    <div class="flex flex-wrap gap-3">
+                      <label class="ed-status-opt flex-1 min-w-[9rem] text-center cursor-pointer px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af]"><input type="radio" name="status" value="กำลังให้บริการ" class="sr-only"><span class="text-sky-700 font-bold text-sm">กำลังให้บริการ</span></label>
+                      <label class="ed-status-opt flex-1 min-w-[9rem] text-center cursor-pointer px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af]"><input type="radio" name="status" value="อยู่ระหว่างการติดตาม" class="sr-only"><span class="text-amber-700 font-bold text-sm">อยู่ระหว่างการติดตาม</span></label>
+                      <label class="ed-status-opt flex-1 min-w-[9rem] text-center cursor-pointer px-3 py-3 border-2 rounded-xl focus-within:ring-2 focus-within:ring-[#3d82af]"><input type="radio" name="status" value="ยุติบริการ" class="sr-only"><span class="text-emerald-700 font-bold text-sm">ยุติบริการ</span></label>
+                    </div>
+                  </fieldset>
+                  <p class="text-xs text-gray-500 mt-3 flex items-start gap-1.5"><svg class="ic mt-0.5" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><span>ข้อมูลการเงิน/อนุเคราะห์แก้ไขที่หน้านี้ไม่ได้ (ผูกกับชีตการเงินและผลอนุมัติ) — ทุกการแก้ไขจะถูกบันทึกประวัติไว้ในชีต EditLog</span></p>
+                </section>
+
+                <div id="ed_error" class="hidden mb-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2" role="alert"></div>
+                <div class="flex justify-end gap-3">
+                  <button type="button" onclick="closeModal('editRecordModal')" class="bg-gray-100 text-gray-700 px-6 min-h-11 rounded-xl font-bold border border-gray-300">ยกเลิก</button>
+                  <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-8 min-h-11 rounded-xl font-bold shadow-md"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>บันทึกการแก้ไข</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
         <!-- ================= 3. หน้าค้นหาประวัติ ================= -->
         <div id="page-search" class="page-section">
           <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800 border-l-4 border-gray-500 pl-3"><svg class="ic ic-gap" aria-hidden="true" focusable="false"><use href="#i-search"/></svg>ค้นหาประวัติผู้ใช้บริการ</h1></div>
@@ -1306,6 +1390,8 @@
         createBuddhistDatePicker('dobInput', { onChange: function(){ try { calculateAge(); } catch(e){} } });
         createBuddhistDatePicker('fu_dob');
         createBuddhistDatePicker('serviceDateUpdate');
+        createBuddhistDatePicker('ed_serviceDate');
+        createBuddhistDatePicker('ed_dob', { onChange: function(sd) { edCalcAge(sd && sd[0]); } });
     }
     // ตั้ง/ล้างค่าวันที่ผ่าน Flatpickr instance แทนการตั้ง .value/.valueAsDate ตรงๆ
     // (เพราะช่องที่มองเห็นถูกสลับเป็น altInput ของ Flatpickr ไปแล้ว ต้องสั่งผ่าน instance เท่านั้น)
@@ -1328,13 +1414,15 @@
         try { initBuddhistDatePickers(); } catch(e){}
         try { setFpDate('serviceDate', new Date()); } catch(e){}
         try { generateFiscalYearOptions(); } catch(e){}
-        try { initZCategoryAutocomplete('zCategoryInput'); initZCategoryAutocomplete('fu_edit_z'); } catch(e){}
+        try { initZCategoryAutocomplete('zCategoryInput'); initZCategoryAutocomplete('fu_edit_z'); initZCategoryAutocomplete('ed_zCategory'); } catch(e){}
         
         try {
             generateAccordion(socialProblemsList, 'socialProblemContainer', 'socialProb', 'text-[#3d82af] focus:ring-[#3d82af]', 'bg-[#3d82af]');
             generateAccordion(interventionsList, 'interventionContainer', 'serviceProvided', 'text-[#2c6385] focus:ring-[#2c6385]', 'bg-[#2c6385]');
             generateAccordion(socialProblemsList, 'fuSocialContainer', 'socialProb', 'text-[#3d82af] focus:ring-[#3d82af]', 'bg-[#3d82af]');
             generateAccordion(interventionsList, 'fuInterventionContainer', 'serviceProvidedUpdate', 'text-[#2c6385] focus:ring-[#2c6385]', 'bg-[#2c6385]');
+            generateAccordion(socialProblemsList, 'edSocialContainer', 'socialProbEdit', 'text-[#3d82af] focus:ring-[#3d82af]', 'bg-[#3d82af]');
+            generateAccordion(interventionsList, 'edInterventionContainer', 'serviceProvidedEdit', 'text-[#2c6385] focus:ring-[#2c6385]', 'bg-[#2c6385]');
         } catch(e) {}
         
         try { toggleFinanceDetails(); } catch(e){}
@@ -2624,6 +2712,13 @@
               'aria-label="อัปเดตการติดตาม ' + E(item.name) + ' (' + E(item.recordId) + ')">' + icn('refresh') + 'อัปเดต</button>'
             : '';
 
+        var btnEdit = item.row
+            ? '<button type="button" data-row="' + E(item.row) + '" onclick="openEditRecord(this.getAttribute(\'data-row\'))" ' +
+              'class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-sm px-4 min-h-11 rounded-lg shadow-sm transition-colors" ' +
+              'aria-label="แก้ไขข้อมูลครั้งนี้ ' + E(item.name) + ' (' + E(item.recordId) + ' วันที่ ' + E(item.date) + ')">' + icn('pen') + 'แก้ไข</button>'
+            : '';
+        var actions = (btnEdit || btnUpdate) ? '<div class="flex flex-wrap gap-2 shrink-0">' + btnEdit + btnUpdate + '</div>' : '';
+
         return '<article class="bg-white rounded-xl border border-gray-200 border-l-4 ' + acc.bar + ' shadow-sm overflow-hidden">' +
           '<header class="bg-gray-50/70 px-5 py-4 border-b border-gray-100 flex flex-wrap items-start justify-between gap-3">' +
             '<div class="min-w-0">' +
@@ -2634,7 +2729,7 @@
               '</div>' +
               '<h3 class="text-lg font-bold text-[#0f5f3f] leading-snug break-words">' + E(item.name || '-') + '</h3>' +
               '<p class="text-sm text-gray-500 mt-0.5 font-mono">' + ids + '</p>' +
-            '</div>' + btnUpdate +
+            '</div>' + actions +
           '</header>' +
           '<div class="px-5 py-4">' +
             '<dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-5">' +
@@ -2658,6 +2753,186 @@
                 '<p class="text-sm text-gray-800 whitespace-pre-line">' + E(item.plan || '-') + '</p></div>' +
           '</div>' +
         '</article>';
+    }
+
+
+    // ---------- แก้ไขข้อมูลที่บันทึกแล้ว ----------
+    function edSetSelect(sel, val) {
+        // ตั้งค่า select; ถ้าค่าเดิมไม่มีในรายการ (เช่น ข้อมูลเก่า/พิมพ์เอง) ให้เพิ่มเป็นตัวเลือกชั่วคราว จะได้ไม่ทำค่าเดิมหาย
+        if (!sel) return;
+        val = val == null ? '' : String(val);
+        if (val && !Array.prototype.some.call(sel.options, function(o) { return o.value === val; })) {
+            var o = document.createElement('option'); o.value = val; o.textContent = val + ' (ค่าเดิม)'; sel.appendChild(o);
+        }
+        sel.value = val;
+    }
+    function edCopyOptions(targetId, sourceSel) {
+        var t = document.getElementById(targetId), src = document.querySelector(sourceSel);
+        if (t && src) t.innerHTML = src.innerHTML;
+    }
+    function edCalcAge(dob) {
+        var ageEl = document.getElementById('ed_age');
+        if (!dob || isNaN(dob.getTime())) return;
+        var t = new Date(), y = t.getFullYear() - dob.getFullYear();
+        if (t.getMonth() < dob.getMonth() || (t.getMonth() === dob.getMonth() && t.getDate() < dob.getDate())) y--;
+        ageEl.value = Math.max(0, y);
+    }
+    function edFillAddress(prov, dist, sub) {
+        var pSel = document.getElementById('ed_province'), dSel = document.getElementById('ed_district'), sSel = document.getElementById('ed_subDistrict');
+        var opts = function(sel, first, list) {
+            sel.innerHTML = '<option value="">' + first + '</option>';
+            list.forEach(function(x) { var o = document.createElement('option'); o.value = x.name.th; o.textContent = x.name.th; sel.appendChild(o); });
+        };
+        var fillD = function() {
+            var p = provincesData.filter(function(x) { return x.name.th === pSel.value; })[0];
+            opts(dSel, '-- อำเภอ --', p ? districtsData.filter(function(x) { return x.province_id === p.id; }) : []);
+        };
+        var fillS = function() {
+            var d = districtsData.filter(function(x) { return x.name.th === dSel.value; })[0];
+            opts(sSel, '-- ตำบล --', d ? subDistrictsData.filter(function(x) { return x.district_id === d.id; }) : []);
+        };
+        opts(pSel, '-- จังหวัด --', provincesData);
+        edSetSelect(pSel, prov); fillD(); edSetSelect(dSel, dist); fillS(); edSetSelect(sSel, sub);
+        pSel.onchange = function() { fillD(); fillS(); };
+        dSel.onchange = fillS;
+    }
+    function edCheckCodes(containerId, codes) {
+        var want = {}; codes.forEach(function(c) { want[c.code] = true; });
+        document.querySelectorAll('#' + containerId + ' input[type=checkbox]').forEach(function(cb) {
+            var code = String(cb.value).replace(/'/g, '').split(' ')[0];
+            cb.checked = !!want[code];
+        });
+        try { resetAccordionSearch(containerId); refreshAccordion(containerId); } catch (e) {}
+    }
+    function edSyncStatusStyle() {
+        document.querySelectorAll('#editRecordForm .ed-status-opt').forEach(function(lbl) {
+            var r = lbl.querySelector('input');
+            lbl.classList.remove('bg-sky-50', 'border-sky-300', 'bg-amber-50', 'border-amber-300', 'bg-emerald-50', 'border-emerald-300', 'border-gray-200');
+            if (!r.checked) { lbl.classList.add('border-gray-200'); return; }
+            if (r.value === 'ยุติบริการ') lbl.classList.add('bg-emerald-50', 'border-emerald-300');
+            else if (r.value === 'อยู่ระหว่างการติดตาม') lbl.classList.add('bg-amber-50', 'border-amber-300');
+            else lbl.classList.add('bg-sky-50', 'border-sky-300');
+        });
+    }
+    function edToggleNat() {
+        var other = document.getElementById('ed_nationalitySelect').value === 'other';
+        document.getElementById('ed_natOtherWrap').classList.toggle('hidden', !other);
+    }
+
+    function openEditRecord(row) {
+        var item = null;
+        for (var i = 0; i < allPatientData.length; i++) { if (String(allPatientData[i].row) === String(row)) { item = allPatientData[i]; break; } }
+        if (!item) { Swal.fire('ไม่พบข้อมูล', 'กรุณากดค้นหาใหม่อีกครั้ง', 'warning'); return; }
+        var form = document.getElementById('editRecordForm');
+        form.reset();
+        document.getElementById('ed_error').classList.add('hidden');
+
+        // ตัวเลือกใช้ชุดเดียวกับฟอร์มบันทึกเคสใหม่
+        edCopyOptions('ed_patientType', '#socialForm [name=patientType]');
+        edCopyOptions('ed_ward', '#socialForm [name=ward]');
+        edCopyOptions('ed_targetGroup', '#socialForm [name=targetGroup]');
+        edCopyOptions('ed_insurance', '#socialForm [name=insurance]');
+        edCopyOptions('ed_nationalitySelect', '#socialForm [name=nationalitySelect]');
+        var wSel = document.getElementById('ed_worker'), mainW = document.querySelector('#socialForm .sw-dynamic-select');
+        if (mainW) wSel.innerHTML = mainW.innerHTML;
+
+        document.getElementById('ed_row').value = item.row;
+        document.getElementById('ed_ts').value = item.ts || '';
+        document.getElementById('ed_recordId').value = item.recordId;
+        var vi = (__visitInfo && __visitInfo.get(item)) || null;
+        document.getElementById('ed_sub').textContent = item.recordId + ' · HN ' + (item.hn || '-') + ' · ' + thaiShortDate(item.date) +
+            (vi ? ' · ครั้งที่ ' + vi.n + '/' + vi.total : '');
+
+        setFpDate('ed_serviceDate', parseThaiDate(item.date));
+        edSetSelect(wSel, item.worker);
+        document.getElementById('ed_an').value = item.an || '';
+        edSetSelect(document.getElementById('ed_patientType'), item.patientType);
+        edSetSelect(document.getElementById('ed_ward'), item.ward);
+
+        document.getElementById('ed_hn').value = String(item.hn || '').replace(/^'/, '');
+        document.getElementById('ed_fullName').value = item.name || '';
+        document.getElementById('ed_idCard').value = item.idcard || '';
+        setFpDate('ed_dob', item.dob ? (/^\d{4}-\d{2}-\d{2}/.test(item.dob) ? item.dob.slice(0, 10) : parseThaiDate(item.dob)) : null);
+        document.getElementById('ed_age').value = String(item.age || '').replace(/[^0-9]/g, '');
+        var natSel = document.getElementById('ed_nationalitySelect');
+        var nat = item.nationality || 'ไทย';
+        if (Array.prototype.some.call(natSel.options, function(o) { return o.value === nat; })) natSel.value = nat;
+        else { natSel.value = 'other'; document.getElementById('ed_nationality').value = nat; }
+        edToggleNat(); natSel.onchange = edToggleNat;
+        edSetSelect(document.getElementById('ed_insurance'), item.insurance);
+        edSetSelect(document.getElementById('ed_targetGroup'), item.target);
+        document.getElementById('ed_icd10').value = item.icd10 || '';
+        document.getElementById('ed_zCategory').value = item.zCat || '';
+        edFillAddress(item.prov, item.dist, item.subDist);
+        document.getElementById('ed_moo').value = item.moo || '';
+
+        edCheckCodes('edSocialContainer', splitCodes(item.socialProblem));
+        edCheckCodes('edInterventionContainer', splitCodes(item.intervention));
+        document.getElementById('ed_detail').value = item.detail || '';
+        document.getElementById('ed_plan').value = item.plan || '';
+
+        var caseStatus = (item.recordId in __caseLatestStatus) ? __caseLatestStatus[item.recordId] : item.status;
+        form.querySelectorAll('input[name=status]').forEach(function(r) { r.checked = (r.value === (caseStatus || 'กำลังให้บริการ')); r.onchange = edSyncStatusStyle; });
+        edSyncStatusStyle();
+        document.getElementById('ed_applyToCase').checked = true;
+        try { autoLinkLabels(); } catch (e) {}
+        openModal('editRecordModal', 'ed_worker');
+    }
+
+    function submitEditRecord(e) {
+        e.preventDefault();
+        var form = e.target, errBox = document.getElementById('ed_error');
+        var fd = new FormData(form), data = {};
+        fd.forEach(function(v, k) { if (k !== 'socialProbEdit' && k !== 'serviceProvidedEdit') data[k] = v; });
+
+        var missing = [];
+        if (!data.serviceDate) missing.push({ id: 'ed_serviceDate', name: 'วันที่ให้บริการ' });
+        if (!data.worker) missing.push({ id: 'ed_worker', name: 'นักสังคมสงเคราะห์' });
+        if (!String(data.hn || '').trim()) missing.push({ id: 'ed_hn', name: 'HN' });
+        if (!String(data.fullName || '').trim()) missing.push({ id: 'ed_fullName', name: 'ชื่อ - นามสกุล' });
+        form.querySelectorAll('[aria-invalid]').forEach(function(el) { el.removeAttribute('aria-invalid'); el.classList.remove('border-red-500'); });
+        if (missing.length) {
+            missing.forEach(function(m) {
+                var el = document.getElementById(m.id); el = (el && el._flatpickr && el._flatpickr.altInput) || el;
+                if (el) { el.setAttribute('aria-invalid', 'true'); el.classList.add('border-red-500'); }
+            });
+            errBox.textContent = 'กรุณากรอก: ' + missing.map(function(m) { return m.name; }).join(', ');
+            errBox.classList.remove('hidden');
+            var first = document.getElementById(missing[0].id); first = (first && first._flatpickr && first._flatpickr.altInput) || first;
+            if (first) first.focus();
+            return;
+        }
+        errBox.classList.add('hidden');
+
+        var socialObj = {};
+        fd.getAll('socialProbEdit').forEach(function(item) {
+            var code = String(item).replace(/'/g, '').split(' ')[0];
+            var cat = code === '00' ? '00' : code.substring(0, 2);
+            (socialObj[cat] = socialObj[cat] || []).push(item);
+        });
+        data.socialProblemsObj = JSON.stringify(socialObj);
+        data.serviceProvided = fd.getAll('serviceProvidedEdit');
+        data.applyToCase = document.getElementById('ed_applyToCase').checked;
+
+        var btn = form.querySelector('button[type=submit]'), txt = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = icn('clock', 'ic-gap') + 'กำลังบันทึก...';
+        gasApiPost('updateRecord', data).then(function(res) {
+            btn.disabled = false; btn.innerHTML = txt;
+            if (res && res.success) {
+                invalidatePatientCache();
+                closeModal('editRecordModal');
+                Swal.fire({ icon: 'success', title: res.changed ? 'แก้ไขเรียบร้อย' : 'ไม่มีการเปลี่ยนแปลง', text: res.message, timer: 1800, showConfirmButton: false });
+                var list = document.getElementById('searchResultList');
+                var keepScroll = document.querySelector('main') ? document.querySelector('main').scrollTop : 0;
+                if (list) { performSearch(); setTimeout(function() { try { document.querySelector('main').scrollTop = keepScroll; } catch (x) {} }, 400); }
+            } else {
+                errBox.textContent = (res && res.error) || 'บันทึกไม่สำเร็จ';
+                errBox.classList.remove('hidden'); errBox.scrollIntoView({ block: 'nearest' });
+            }
+        }).catch(function(err) {
+            btn.disabled = false; btn.innerHTML = txt;
+            errBox.textContent = 'บันทึกไม่สำเร็จ: ' + err; errBox.classList.remove('hidden');
+        });
     }
 
     function renderMoreSearchResults() {
